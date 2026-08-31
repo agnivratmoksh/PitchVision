@@ -1,0 +1,1703 @@
+/* =========================================
+   RESET
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+
+    font-family: "Inter", sans-serif;
+
+    background: #f5f7f4;
+
+    color: #1c251f;
+
+    line-height: 1.6;
+
+    padding-top: 78px;
+
+}
+
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+
+button {
+    font-family: inherit;
+}
+
+
+/* =========================================
+   NAVBAR
+========================================= */
+
+.navbar {
+
+    position: fixed;
+
+    top: 0;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 100%;
+
+    max-width: 1180px;
+
+    height: 78px;
+
+    padding: 0 30px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    background: rgba(245, 247, 244, 0.95);
+
+    border-bottom: 1px solid #e0e5e1;
+
+    z-index: 1000;
+
+}
+
+
+.nav-logo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+}
+
+
+.logo-mark {
+
+    width: 28px;
+    height: 28px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 6px;
+
+    background: #294d36;
+
+    color: white;
+
+    font-size: 12px;
+
+}
+
+
+.nav-links {
+
+    display: flex;
+
+    gap: 25px;
+
+    color: #68736b;
+
+    font-size: 11px;
+
+}
+
+
+.nav-links a:hover {
+    color: #294d36;
+}
+
+
+/* =========================================
+   HERO
+========================================= */
+
+.hero {
+
+    max-width: 1100px;
+
+    min-height: 580px;
+
+    margin: auto;
+
+    padding: 80px 30px;
+
+    display: grid;
+
+    grid-template-columns: 1.15fr .85fr;
+
+    gap: 70px;
+
+    align-items: center;
+
+}
+
+
+.eyebrow {
+
+    font-size: 10px;
+
+    letter-spacing: 1.7px;
+
+    color: #65776a;
+
+    margin-bottom: 18px;
+
+}
+
+
+.hero h1 {
+
+    max-width: 680px;
+
+    font-size: clamp(38px, 5vw, 60px);
+
+    line-height: 1.06;
+
+    letter-spacing: -2.5px;
+
+    font-weight: 600;
+
+}
+
+
+.hero h1 span {
+
+    display: block;
+
+    color: #68736c;
+
+}
+
+
+.hero-description {
+
+    max-width: 600px;
+
+    margin-top: 24px;
+
+    color: #69736c;
+
+    font-size: 14px;
+
+    line-height: 1.8;
+
+}
+
+
+.hero-buttons {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 28px;
+
+}
+
+
+.button {
+
+    padding: 10px 16px;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+
+}
+
+
+.primary-button {
+
+    background: #294d36;
+
+    color: white;
+
+}
+
+
+.secondary-button {
+
+    border: 1px solid #d5ddd6;
+
+    color: #536058;
+
+}
+
+
+.secondary-button:hover {
+
+    background: white;
+
+}
+
+
+/* =========================================
+   HERO VISUAL
+========================================= */
+
+.hero-visual {
+
+    display: flex;
+
+    justify-content: center;
+
+}
+
+
+.hero-card {
+
+    width: 300px;
+
+    padding: 22px;
+
+    border: 1px solid #d7e0d9;
+
+    border-radius: 9px;
+
+    background: #edf2ee;
+
+}
+
+
+.hero-card-top {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color: #7d8981;
+
+    font-size: 8px;
+
+    letter-spacing: 1.2px;
+
+}
+
+
+.hero-card-line {
+
+    height: 1px;
+
+    margin: 18px 0;
+
+    background: #d2dcd4;
+
+}
+
+
+.hero-card-content {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+
+.hero-dot {
+
+    width: 12px;
+    height: 12px;
+
+    border-radius: 50%;
+
+    background: #294d36;
+
+    box-shadow:
+        0 0 0 6px rgba(41, 77, 54, .08);
+
+}
+
+
+.hero-card-content strong {
+
+    display: block;
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+}
+
+
+.hero-card-content small {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #7c877f;
+
+    font-size: 9px;
+
+}
+
+
+/* =========================================
+   SECTIONS
+========================================= */
+
+.section {
+
+    max-width: 1050px;
+
+    margin: auto;
+
+    padding: 75px 30px;
+
+}
+
+
+.section-heading {
+
+    display: grid;
+
+    grid-template-columns: 50px 1fr;
+
+    gap: 15px;
+
+    margin-bottom: 38px;
+
+}
+
+
+.section-number {
+
+    padding-top: 4px;
+
+    font-size: 10px;
+
+    color: #8a948d;
+
+}
+
+
+.section-label {
+
+    margin-bottom: 8px;
+
+    font-size: 10px;
+
+    letter-spacing: 1.6px;
+
+    color: #66786b;
+
+}
+
+
+.section-heading h2 {
+
+    max-width: 700px;
+
+    font-size: clamp(27px, 3vw, 37px);
+
+    line-height: 1.15;
+
+    letter-spacing: -1px;
+
+    font-weight: 600;
+
+}
+
+
+.section-intro {
+
+    max-width: 670px;
+
+    margin-top: 13px;
+
+    color: #747e77;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+}
+
+
+/* =========================================
+   PROBLEM
+========================================= */
+
+.two-column {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 70px;
+
+}
+
+
+.description p {
+
+    margin-bottom: 18px;
+
+    color: #6e7871;
+
+    font-size: 14px;
+
+    line-height: 1.85;
+
+}
+
+
+.objective-list {
+
+    border-left: 1px solid #d2dad4;
+
+    padding-left: 25px;
+
+}
+
+
+.objective-list div {
+
+    display: flex;
+
+    gap: 18px;
+
+    padding: 12px 0;
+
+    font-size: 13px;
+
+    color: #56625a;
+
+}
+
+
+.objective-list span {
+
+    color: #8b958e;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================
+   PIPELINE
+========================================= */
+
+.pipeline {
+
+    max-width: 720px;
+
+}
+
+
+.pipeline-step {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 18px;
+
+    margin-bottom: 7px;
+
+    border: 1px solid transparent;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+}
+
+
+.pipeline-step:hover {
+
+    background: white;
+
+    border-color: #dde3de;
+
+}
+
+
+.pipeline-step.active {
+
+    background: white;
+
+    border-color: #d2dcd4;
+
+}
+
+
+.pipeline-step > span {
+
+    width: 30px;
+
+    color: #8a948d;
+
+    font-size: 10px;
+
+}
+
+
+.pipeline-step.active > span {
+
+    color: #294d36;
+
+}
+
+
+.pipeline-step strong {
+
+    display: block;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+}
+
+
+.pipeline-step small {
+
+    color: #879088;
+
+    font-size: 11px;
+
+}
+
+
+/* =========================================
+   SYSTEM VISUALIZER
+========================================= */
+
+.visualizer {
+
+    overflow: hidden;
+
+    border: 1px solid #d9e1db;
+
+    border-radius: 10px;
+
+    background: white;
+
+    box-shadow:
+        0 10px 30px rgba(30, 50, 37, .035);
+
+}
+
+
+.visualizer-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 19px 22px;
+
+    border-bottom: 1px solid #e2e8e3;
+
+}
+
+
+.visualizer-label {
+
+    display: block;
+
+    font-size: 8px;
+
+    letter-spacing: 1.3px;
+
+    color: #89938c;
+
+}
+
+
+.visualizer-header h3 {
+
+    margin-top: 3px;
+
+    font-size: 16px;
+
+    font-weight: 500;
+
+}
+
+
+.stage-counter {
+
+    color: #8d9690;
+
+    font-size: 10px;
+
+}
+
+
+.stage-counter span {
+
+    color: #294d36;
+
+    font-weight: 500;
+
+}
+
+
+/* =========================================
+   VISUALIZER MAIN
+========================================= */
+
+.visualizer-main {
+
+    display: grid;
+
+    grid-template-columns: 1.15fr .85fr;
+
+    min-height: 470px;
+
+}
+
+
+.image-panel {
+
+    background: #edf1ee;
+
+    border-right: 1px solid #e0e6e1;
+
+}
+
+
+.output-panel {
+
+    background: #fafbf9;
+
+}
+
+
+/* =========================================
+   PANEL TOP
+========================================= */
+
+.panel-top {
+
+    height: 40px;
+
+    padding: 0 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-bottom: 1px solid #dfe6e1;
+
+    color: #818b84;
+
+    font-size: 8px;
+
+    letter-spacing: 1px;
+
+}
+
+
+.panel-status {
+
+    color: #52735b;
+
+}
+
+
+.output-live {
+
+    color: #60806a;
+
+}
+
+
+/* =========================================
+   REAL IMAGE
+========================================= */
+
+.football-image-container {
+
+    position: relative;
+
+    width: 100%;
+
+    height: 400px;
+
+    overflow: hidden;
+
+    background: #ccd5ce;
+
+}
+
+
+.football-image {
+
+    width: 100%;
+
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+}
+
+
+/* =========================================
+   YOLO BOXES
+========================================= */
+
+.yolo-box {
+
+    position: absolute;
+
+    border: 2px solid #65c27b;
+
+    pointer-events: none;
+
+    transition: opacity .3s ease;
+
+}
+
+
+.yolo-box span {
+
+    position: absolute;
+
+    top: -19px;
+
+    left: -2px;
+
+    padding: 3px 5px;
+
+    white-space: nowrap;
+
+    background: #65c27b;
+
+    color: #102015;
+
+    font-family: monospace;
+
+    font-size: 8px;
+
+    line-height: 1;
+
+}
+
+
+/* Player positions for the selected photograph */
+
+.box-player-1 {
+
+    left: 6%;
+
+    top: 49%;
+
+    width: 10%;
+
+    height: 35%;
+
+}
+
+
+.box-player-2 {
+
+    left: 26%;
+
+    top: 47%;
+
+    width: 10%;
+
+    height: 30%;
+
+}
+
+
+.box-player-3 {
+
+    left: 46%;
+
+    top: 42%;
+
+    width: 9%;
+
+    height: 32%;
+
+}
+
+
+.box-player-4 {
+
+    left: 58%;
+
+    top: 35%;
+
+    width: 10%;
+
+    height: 34%;
+
+}
+
+
+.box-player-5 {
+
+    left: 77%;
+
+    top: 41%;
+
+    width: 10%;
+
+    height: 30%;
+
+}
+
+
+.box-player-6 {
+
+    left: 40%;
+
+    top: 43%;
+
+    width: 11%;
+
+    height: 35%;
+
+    border-color: #e3a05f;
+
+}
+
+
+.box-player-6 span {
+
+    background: #e3a05f;
+
+}
+
+
+.box-player-7 {
+
+    left: 68%;
+
+    top: 46%;
+
+    width: 9%;
+
+    height: 28%;
+
+}
+
+
+.box-player-8 {
+
+    left: 87%;
+
+    top: 40%;
+
+    width: 9%;
+
+    height: 29%;
+
+}
+
+
+.box-ball {
+
+    left: 58%;
+
+    top: 29%;
+
+    width: 3%;
+
+    height: 5%;
+
+    min-width: 12px;
+
+    min-height: 12px;
+
+    border-color: #f0c65a;
+
+}
+
+
+.box-ball span {
+
+    background: #f0c65a;
+
+}
+
+
+/* =========================================
+   IMAGE CREDIT
+========================================= */
+
+.image-credit {
+
+    padding: 8px 13px;
+
+    color: #89938c;
+
+    font-size: 8px;
+
+    background: #e7ece8;
+
+}
+
+
+/* =========================================
+   OUTPUT DESCRIPTION
+========================================= */
+
+.output-description {
+
+    display: flex;
+
+    gap: 14px;
+
+    padding: 22px 20px 15px;
+
+}
+
+
+.output-description > span {
+
+    color: #8b958e;
+
+    font-size: 9px;
+
+}
+
+
+.output-description h4 {
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+}
+
+
+.output-description p {
+
+    max-width: 330px;
+
+    margin-top: 5px;
+
+    color: #78827b;
+
+    font-size: 10px;
+
+    line-height: 1.65;
+
+}
+
+
+/* =========================================
+   TACTICAL VIEW
+========================================= */
+
+.tactical-view {
+
+    height: 245px;
+
+    padding: 10px 20px;
+
+}
+
+
+.tactical-pitch {
+
+    position: relative;
+
+    width: 100%;
+
+    height: 100%;
+
+    background: #e0e9e1;
+
+    border: 1px solid #bdcbbf;
+
+}
+
+
+.pitch-half {
+
+    position: absolute;
+
+    left: 50%;
+
+    top: 0;
+
+    width: 1px;
+
+    height: 100%;
+
+    background: #bac9bc;
+
+}
+
+
+.pitch-circle {
+
+    position: absolute;
+
+    left: 50%;
+
+    top: 50%;
+
+    width: 55px;
+
+    height: 55px;
+
+    transform: translate(-50%, -50%);
+
+    border: 1px solid #bac9bc;
+
+    border-radius: 50%;
+
+}
+
+
+/* =========================================
+   TACTICAL PLAYERS
+========================================= */
+
+.tactical-player {
+
+    position: absolute;
+
+    width: 10px;
+
+    height: 10px;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+}
+
+
+.team-a {
+
+    background: #294d36;
+
+    box-shadow:
+        0 0 0 4px rgba(41,77,54,.08);
+
+}
+
+
+.team-b {
+
+    background: #b56c50;
+
+    box-shadow:
+        0 0 0 4px rgba(181,108,80,.08);
+
+}
+
+
+/* Team A */
+
+.a1  { left: 12%; top: 50%; }
+.a2  { left: 25%; top: 22%; }
+.a3  { left: 25%; top: 78%; }
+
+.a4  { left: 38%; top: 32%; }
+.a5  { left: 38%; top: 50%; }
+.a6  { left: 38%; top: 68%; }
+
+.a7  { left: 52%; top: 25%; }
+.a8  { left: 52%; top: 42%; }
+.a9  { left: 52%; top: 58%; }
+.a10 { left: 52%; top: 75%; }
+
+.a11 { left: 65%; top: 50%; }
+
+
+/* Team B */
+
+.b1  { left: 88%; top: 50%; }
+.b2  { left: 75%; top: 22%; }
+.b3  { left: 75%; top: 78%; }
+
+.b4  { left: 62%; top: 32%; }
+.b5  { left: 62%; top: 50%; }
+.b6  { left: 62%; top: 68%; }
+
+.b7  { left: 48%; top: 25%; }
+.b8  { left: 48%; top: 42%; }
+.b9  { left: 48%; top: 58%; }
+.b10 { left: 48%; top: 75%; }
+
+.b11 { left: 35%; top: 50%; }
+
+
+/* =========================================
+   METRICS
+========================================= */
+
+.metrics {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    margin: 0 20px;
+
+    border-top: 1px solid #e1e6e2;
+
+}
+
+
+.metrics > div {
+
+    padding: 12px 8px;
+
+    border-right: 1px solid #e1e6e2;
+
+}
+
+
+.metrics > div:last-child {
+
+    border-right: none;
+
+}
+
+
+.metrics span {
+
+    display: block;
+
+    color: #8b958e;
+
+    font-size: 7px;
+
+    letter-spacing: 1px;
+
+}
+
+
+.metrics strong {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: #36443a;
+
+    font-size: 11px;
+
+    font-weight: 500;
+
+}
+
+
+/* =========================================
+   CONTROLS
+========================================= */
+
+.visualizer-controls {
+
+    min-height: 68px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 10px 17px;
+
+    border-top: 1px solid #e0e6e1;
+
+}
+
+
+.control-button {
+
+    padding: 7px 10px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #6e7971;
+
+    font-size: 9px;
+
+    cursor: pointer;
+
+}
+
+
+.control-button.next {
+
+    padding: 7px 12px;
+
+    border-radius: 5px;
+
+    background: #294d36;
+
+    color: white;
+
+}
+
+
+.stage-buttons {
+
+    display: flex;
+
+    gap: 3px;
+
+    overflow-x: auto;
+
+}
+
+
+.stage-button {
+
+    padding: 7px 8px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    border: none;
+
+    border-radius: 4px;
+
+    background: transparent;
+
+    color: #89928c;
+
+    font-size: 8px;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+}
+
+
+.stage-button span {
+
+    color: #a0aaa3;
+
+}
+
+
+.stage-button.active {
+
+    background: #edf2ee;
+
+    color: #294d36;
+
+}
+
+
+.stage-button.active span {
+
+    color: #294d36;
+
+}
+
+
+/* =========================================
+   ANALYSIS
+========================================= */
+
+.analysis-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 10px;
+
+}
+
+
+.analysis-card {
+
+    padding: 23px;
+
+    border: 1px solid #dce3de;
+
+    border-radius: 8px;
+
+    background: rgba(255,255,255,.35);
+
+}
+
+
+.analysis-card > span {
+
+    color: #8b958e;
+
+    font-size: 9px;
+
+}
+
+
+.analysis-card h3 {
+
+    margin-top: 11px;
+
+    font-size: 15px;
+
+    font-weight: 500;
+
+}
+
+
+.analysis-card p {
+
+    margin-top: 7px;
+
+    color: #737d76;
+
+    font-size: 11px;
+
+    line-height: 1.7;
+
+}
+
+
+.tech {
+
+    display: flex;
+
+    gap: 8px;
+
+    margin-top: 17px;
+
+    padding-top: 11px;
+
+    border-top: 1px solid #e2e7e3;
+
+    color: #7f8982;
+
+    font-size: 9px;
+
+}
+
+
+.tech b {
+
+    color: #56625a;
+
+    font-weight: 500;
+
+}
+
+
+/* =========================================
+   DEVELOPMENT
+========================================= */
+
+.development-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 12px;
+
+}
+
+
+.development-card {
+
+    min-height: 210px;
+
+    padding: 22px;
+
+    border: 1px solid #dce3de;
+
+    border-radius: 8px;
+
+    background: rgba(255,255,255,.35);
+
+}
+
+
+.development-card > span {
+
+    color: #8a948d;
+
+    font-size: 9px;
+
+}
+
+
+.development-card h3 {
+
+    margin-top: 20px;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+}
+
+
+.development-card p {
+
+    margin-top: 8px;
+
+    color: #747e77;
+
+    font-size: 11px;
+
+    line-height: 1.7;
+
+}
+
+
+.development-card > div {
+
+    margin-top: 20px;
+
+    padding-top: 10px;
+
+    border-top: 1px solid #e2e7e3;
+
+    color: #68746c;
+
+    font-size: 9px;
+
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+footer {
+
+    max-width: 1050px;
+
+    margin: auto;
+
+    padding: 40px 30px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-top: 1px solid #dce3de;
+
+    color: #7d877f;
+
+    font-size: 10px;
+
+}
+
+
+.footer-logo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: #29362e;
+
+    font-weight: 600;
+
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+
+    .hero {
+
+        grid-template-columns: 1fr;
+
+        gap: 40px;
+
+    }
+
+
+    .hero-visual {
+
+        justify-content: flex-start;
+
+    }
+
+
+    .visualizer-main {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .image-panel {
+
+        border-right: none;
+
+        border-bottom: 1px solid #e0e6e1;
+
+    }
+
+
+    .development-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .nav-links {
+
+        display: none;
+
+    }
+
+
+    .two-column {
+
+        grid-template-columns: 1fr;
+
+        gap: 30px;
+
+    }
+
+
+    .analysis-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .development-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .visualizer-controls {
+
+        flex-wrap: wrap;
+
+        justify-content: center;
+
+    }
+
+
+    .stage-buttons {
+
+        width: 100%;
+
+        order: 3;
+
+        justify-content: center;
+
+    }
+
+
+    .football-image-container {
+
+        height: 300px;
+
+    }
+
+}
+
+
+@media (max-width: 500px) {
+
+    .section {
+
+        padding: 60px 20px;
+
+    }
+
+
+    .hero {
+
+        padding:
+            55px 20px;
+
+    }
+
+
+    .hero h1 {
+
+        font-size: 39px;
+
+    }
+
+
+    .metrics {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+
+    .metrics > div:nth-child(2) {
+
+        border-right: none;
+
+    }
+
+
+    .metrics > div:nth-child(-n+2) {
+
+        border-bottom:
+            1px solid #e1e6e2;
+
+    }
+
+}

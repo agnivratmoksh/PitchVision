@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        PitchVision | Football Match Analysis
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================
+     NAVBAR
+========================================= -->
+
+<nav class="navbar">
+
+    <div class="nav-logo">
+
+        <span class="logo-mark">
+            P
+        </span>
+
+        PitchVision
+
+    </div>
+
+
+    <div class="nav-links">
+
+        <a href="#problem">
+            Problem
+        </a>
+
+        <a href="#pipeline">
+            Methodology
+        </a>
+
+        <a href="#demo">
+            Visualizer
+        </a>
+
+        <a href="#analysis">
+            Analysis
+        </a>
+
+        <a href="#milestones">
+            Development
+        </a>
+
+    </div>
+
+</nav>
+
+
+
+<main>
+
+
+<!-- =========================================
+     HERO
+========================================= -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <p class="eyebrow">
+            COMPUTER VISION PROJECT
+        </p>
+
+
+        <h1>
+
+            PitchVision:
+
+            <span>
+                AI-Powered Football Match Analysis
+            </span>
+
+        </h1>
+
+
+        <p class="hero-description">
+
+            A computer vision pipeline for detecting football
+            players and the ball, classifying teams, estimating
+            player positions, identifying formations, and
+            generating basic tactical information from match images.
+
+        </p>
+
+
+        <div class="hero-buttons">
+
+            <a
+                href="#problem"
+                class="button primary-button"
+            >
+                Project Overview
+            </a>
+
+
+            <a
+                href="#demo"
+                class="button secondary-button"
+            >
+                View System
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-visual">
+
+        <div class="hero-card">
+
+            <div class="hero-card-top">
+
+                <span>
+                    COMPUTER VISION
+                </span>
+
+                <span>
+                    01
+                </span>
+
+            </div>
+
+
+            <div class="hero-card-line"></div>
+
+
+            <div class="hero-card-content">
+
+                <div class="hero-dot"></div>
+
+                <div>
+                    <strong>
+                        Match Analysis
+                    </strong>
+
+                    <small>
+                        Detection → Mapping → Analytics
+                    </small>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     PROBLEM
+========================================= -->
+
+<section
+    class="section"
+    id="problem"
+>
+
+    <div class="section-heading">
+
+        <span class="section-number">
+            01
+        </span>
+
+
+        <div>
+
+            <p class="section-label">
+                PROBLEM STATEMENT
+            </p>
+
+
+            <h2>
+                Extracting structured information
+                from football match images.
+            </h2>
+
+
+            <p class="section-intro">
+
+                A football match image contains information about
+                player positions, team structure, field geometry,
+                and the spatial organization of the game.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="two-column">
+
+        <div class="description">
+
+            <p>
+
+                PitchVision aims to automatically extract this
+                information using computer vision, deep learning,
+                machine learning, and spatial analysis.
+
+            </p>
+
+
+            <p>
+
+                The system begins with low-level visual detection
+                and progressively converts the detected objects
+                into a structured representation of the match.
+
+            </p>
+
+        </div>
+
+
+        <div class="objective-list">
+
+            <div>
+                <span>01</span>
+                Detect players, referees and ball
+            </div>
+
+            <div>
+                <span>02</span>
+                Classify players into teams
+            </div>
+
+            <div>
+                <span>03</span>
+                Estimate player positions
+            </div>
+
+            <div>
+                <span>04</span>
+                Identify team formations
+            </div>
+
+            <div>
+                <span>05</span>
+                Generate tactical metrics
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     METHODOLOGY
+========================================= -->
+
+<section
+    class="section"
+    id="pipeline"
+>
+
+    <div class="section-heading">
+
+        <span class="section-number">
+            02
+        </span>
+
+
+        <div>
+
+            <p class="section-label">
+                METHODOLOGY
+            </p>
+
+
+            <h2>
+                Image analysis pipeline.
+            </h2>
+
+
+            <p class="section-intro">
+
+                The image passes through several stages.
+                Each stage extracts information required
+                by the next stage of the analysis.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="pipeline">
+
+        <div
+            class="pipeline-step active"
+            data-stage="1"
+        >
+
+            <span>01</span>
+
+            <div>
+
+                <strong>
+                    Object Detection
+                </strong>
+
+                <small>
+                    Detect players, goalkeepers, referees and ball
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="pipeline-step"
+            data-stage="2"
+        >
+
+            <span>02</span>
+
+            <div>
+
+                <strong>
+                    Team Classification
+                </strong>
+
+                <small>
+                    Separate detected players into teams
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="pipeline-step"
+            data-stage="3"
+        >
+
+            <span>03</span>
+
+            <div>
+
+                <strong>
+                    Spatial Mapping
+                </strong>
+
+                <small>
+                    Map image coordinates to the pitch
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="pipeline-step"
+            data-stage="4"
+        >
+
+            <span>04</span>
+
+            <div>
+
+                <strong>
+                    Formation Analysis
+                </strong>
+
+                <small>
+                    Analyze player positions and structure
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="pipeline-step"
+            data-stage="5"
+        >
+
+            <span>05</span>
+
+            <div>
+
+                <strong>
+                    Insight Generation
+                </strong>
+
+                <small>
+                    Calculate basic tactical information
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     SYSTEM VISUALIZER
+========================================= -->
+
+<section
+    class="section"
+    id="demo"
+>
+
+    <div class="section-heading">
+
+        <span class="section-number">
+            03
+        </span>
+
+
+        <div>
+
+            <p class="section-label">
+                SYSTEM VISUALIZER
+            </p>
+
+
+            <h2>
+                From match image to tactical representation.
+            </h2>
+
+
+            <p class="section-intro">
+
+                The visualization below demonstrates how a football
+                image can be progressively converted into structured
+                information by the analysis pipeline.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- VISUALIZER -->
+
+    <div class="visualizer">
+
+
+        <!-- HEADER -->
+
+        <div class="visualizer-header">
+
+            <div>
+
+                <span class="visualizer-label">
+                    CURRENT PIPELINE STAGE
+                </span>
+
+
+                <h3 id="stageTitle">
+                    Object Detection
+                </h3>
+
+            </div>
+
+
+            <div class="stage-counter">
+
+                <span id="stageNumber">
+                    01
+                </span>
+
+                / 05
+
+            </div>
+
+        </div>
+
+
+
+        <!-- MAIN -->
+
+        <div class="visualizer-main">
+
+
+            <!-- =================================
+                 IMAGE
+            ================================= -->
+
+            <div class="image-panel">
+
+                <div class="panel-top">
+
+                    <span>
+                        MATCH FRAME
+                    </span>
+
+
+                    <span
+                        class="panel-status"
+                        id="panelStatus"
+                    >
+                        DETECTION
+                    </span>
+
+                </div>
+
+
+                <div class="football-image-container">
+
+                    <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Football_players.jpg/1280px-Football_players.jpg"
+                        alt="Football match"
+                        class="football-image"
+                    >
+
+
+                    <!-- YOLO STYLE BOXES -->
+
+                    <div
+                        class="yolo-box box-player-1"
+                    >
+
+                        <span>
+                            player 0.94
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="yolo-box box-player-2"
+                    >
+
+                        <span>
+                            player 0.91
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="yolo-box box-player-3"
+                    >
+
+                        <span>
+                            player 0.89
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="yolo-box box-player-4"
+                    >
+
+                        <span>
+                            player 0.93
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="yolo-box box-player-5"
+                    >
+
+                        <span>
+                            player 0.88
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="yolo-box box-player-6"
+                    >
+
+                        <span>
+                            goalkeeper 0.96
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="yolo-box box-player-7"
+                    >
+
+                        <span>
+                            player 0.90
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="yolo-box box-player-8"
+                    >
+
+                        <span>
+                            player 0.87
+                        </span>
+
+                    </div>
+
+
+                    <!-- BALL -->
+
+                    <div
+                        class="yolo-box box-ball"
+                    >
+
+                        <span>
+                            ball 0.82
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="image-credit">
+
+                    Image:
+                    Happi Raphael /
+                    Wikimedia Commons /
+                    CC BY-SA 4.0
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================
+                 OUTPUT
+            ================================= -->
+
+            <div class="output-panel">
+
+
+                <div class="panel-top">
+
+                    <span>
+                        SYSTEM OUTPUT
+                    </span>
+
+
+                    <span class="output-live">
+                        ● DEMO
+                    </span>
+
+                </div>
+
+
+
+                <div class="output-description">
+
+                    <span id="outputNumber">
+                        01
+                    </span>
+
+
+                    <div>
+
+                        <h4 id="outputTitle">
+                            Object Detection
+                        </h4>
+
+
+                        <p id="outputText">
+
+                            The detection stage identifies
+                            football-related objects and returns
+                            their locations, classes and confidence
+                            scores.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TACTICAL VIEW -->
+
+                <div class="tactical-view">
+
+                    <div class="tactical-pitch">
+
+                        <div class="pitch-half"></div>
+
+                        <div class="pitch-circle"></div>
+
+
+                        <!-- TEAM A -->
+
+                        <div class="tactical-player team-a a1"></div>
+                        <div class="tactical-player team-a a2"></div>
+                        <div class="tactical-player team-a a3"></div>
+                        <div class="tactical-player team-a a4"></div>
+                        <div class="tactical-player team-a a5"></div>
+                        <div class="tactical-player team-a a6"></div>
+                        <div class="tactical-player team-a a7"></div>
+                        <div class="tactical-player team-a a8"></div>
+                        <div class="tactical-player team-a a9"></div>
+                        <div class="tactical-player team-a a10"></div>
+                        <div class="tactical-player team-a a11"></div>
+
+
+                        <!-- TEAM B -->
+
+                        <div class="tactical-player team-b b1"></div>
+                        <div class="tactical-player team-b b2"></div>
+                        <div class="tactical-player team-b b3"></div>
+                        <div class="tactical-player team-b b4"></div>
+                        <div class="tactical-player team-b b5"></div>
+                        <div class="tactical-player team-b b6"></div>
+                        <div class="tactical-player team-b b7"></div>
+                        <div class="tactical-player team-b b8"></div>
+                        <div class="tactical-player team-b b9"></div>
+                        <div class="tactical-player team-b b10"></div>
+                        <div class="tactical-player team-b b11"></div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- METRICS -->
+
+                <div class="metrics">
+
+                    <div>
+
+                        <span>
+                            OBJECTS
+                        </span>
+
+                        <strong id="objects">
+                            9
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            TEAMS
+                        </span>
+
+                        <strong id="teams">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            FORMATION
+                        </span>
+
+                        <strong id="formation">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            POSITION
+                        </span>
+
+                        <strong id="position">
+                            IMAGE
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================
+             CONTROLS
+        ================================= -->
+
+        <div class="visualizer-controls">
+
+
+            <button
+                id="previousStage"
+                class="control-button"
+            >
+                ← Previous
+            </button>
+
+
+            <div class="stage-buttons">
+
+
+                <button
+                    class="stage-button active"
+                    data-stage="1"
+                >
+
+                    <span>
+                        01
+                    </span>
+
+                    Detection
+
+                </button>
+
+
+                <button
+                    class="stage-button"
+                    data-stage="2"
+                >
+
+                    <span>
+                        02
+                    </span>
+
+                    Classification
+
+                </button>
+
+
+                <button
+                    class="stage-button"
+                    data-stage="3"
+                >
+
+                    <span>
+                        03
+                    </span>
+
+                    Mapping
+
+                </button>
+
+
+                <button
+                    class="stage-button"
+                    data-stage="4"
+                >
+
+                    <span>
+                        04
+                    </span>
+
+                    Formation
+
+                </button>
+
+
+                <button
+                    class="stage-button"
+                    data-stage="5"
+                >
+
+                    <span>
+                        05
+                    </span>
+
+                    Insights
+
+                </button>
+
+
+            </div>
+
+
+            <button
+                id="nextStage"
+                class="control-button next"
+            >
+                Next →
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     ANALYSIS
+========================================= -->
+
+<section
+    class="section"
+    id="analysis"
+>
+
+    <div class="section-heading">
+
+        <span class="section-number">
+            04
+        </span>
+
+
+        <div>
+
+            <p class="section-label">
+                ANALYSIS
+            </p>
+
+
+            <h2>
+                Processing and interpreting
+                detected information.
+            </h2>
+
+
+            <p class="section-intro">
+
+                Different computer vision and machine learning
+                techniques are applied at each stage of the pipeline.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="analysis-grid">
+
+
+        <div class="analysis-card">
+
+            <span>01</span>
+
+            <h3>
+                Object Detection
+            </h3>
+
+            <p>
+                Detect players, goalkeepers, referees
+                and the football.
+            </p>
+
+            <div class="tech">
+                <b>Technology</b>
+                YOLO · PyTorch
+            </div>
+
+        </div>
+
+
+        <div class="analysis-card">
+
+            <span>02</span>
+
+            <h3>
+                Team Classification
+            </h3>
+
+            <p>
+                Separate players into teams using
+                visual appearance and color.
+            </p>
+
+            <div class="tech">
+                <b>Technology</b>
+                OpenCV · Scikit-Learn
+            </div>
+
+        </div>
+
+
+        <div class="analysis-card">
+
+            <span>03</span>
+
+            <h3>
+                Spatial Mapping
+            </h3>
+
+            <p>
+                Transform image positions into
+                normalized pitch coordinates.
+            </p>
+
+            <div class="tech">
+                <b>Technology</b>
+                OpenCV
+            </div>
+
+        </div>
+
+
+        <div class="analysis-card">
+
+            <span>04</span>
+
+            <h3>
+                Formation Analysis
+            </h3>
+
+            <p>
+                Analyze spatial player distributions
+                to estimate formations.
+            </p>
+
+            <div class="tech">
+                <b>Technology</b>
+                Python · Scikit-Learn
+            </div>
+
+        </div>
+
+
+        <div class="analysis-card">
+
+            <span>05</span>
+
+            <h3>
+                Tactical Metrics
+            </h3>
+
+            <p>
+                Estimate width, compactness and
+                positional distributions.
+            </p>
+
+            <div class="tech">
+                <b>Technology</b>
+                Python · Matplotlib
+            </div>
+
+        </div>
+
+
+        <div class="analysis-card">
+
+            <span>06</span>
+
+            <h3>
+                Visualization
+            </h3>
+
+            <p>
+                Present the processed information
+                using pitch-based visualizations.
+            </p>
+
+            <div class="tech">
+                <b>Technology</b>
+                Matplotlib · JavaScript
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     DEVELOPMENT
+========================================= -->
+
+<section
+    class="section"
+    id="milestones"
+>
+
+    <div class="section-heading">
+
+        <span class="section-number">
+            05
+        </span>
+
+
+        <div>
+
+            <p class="section-label">
+                DEVELOPMENT STAGES
+            </p>
+
+
+            <h2>
+                Building the analysis pipeline.
+            </h2>
+
+
+            <p class="section-intro">
+
+                The system is developed progressively,
+                beginning with visual detection and moving
+                toward structured tactical analysis.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="development-grid">
+
+
+        <div class="development-card">
+
+            <span>01</span>
+
+            <h3>
+                Dataset & Detection
+            </h3>
+
+            <p>
+                Prepare football images and train the
+                object detection model.
+            </p>
+
+            <div>
+                YOLO · PyTorch
+            </div>
+
+        </div>
+
+
+        <div class="development-card">
+
+            <span>02</span>
+
+            <h3>
+                Team Classification
+            </h3>
+
+            <p>
+                Identify team membership from player
+                appearance and color.
+            </p>
+
+            <div>
+                OpenCV · Scikit-Learn
+            </div>
+
+        </div>
+
+
+        <div class="development-card">
+
+            <span>03</span>
+
+            <h3>
+                Pitch Mapping
+            </h3>
+
+            <p>
+                Transform camera coordinates into
+                a top-down pitch representation.
+            </p>
+
+            <div>
+                OpenCV
+            </div>
+
+        </div>
+
+
+        <div class="development-card">
+
+            <span>04</span>
+
+            <h3>
+                Formation Estimation
+            </h3>
+
+            <p>
+                Analyze player positions and estimate
+                team formations.
+            </p>
+
+            <div>
+                Python · Scikit-Learn
+            </div>
+
+        </div>
+
+
+        <div class="development-card">
+
+            <span>05</span>
+
+            <h3>
+                Analytics
+            </h3>
+
+            <p>
+                Generate spatial and tactical metrics
+                from player distributions.
+            </p>
+
+            <div>
+                Python · Matplotlib
+            </div>
+
+        </div>
+
+
+        <div class="development-card">
+
+            <span>06</span>
+
+            <h3>
+                Integration & Testing
+            </h3>
+
+            <p>
+                Combine the components into an
+                end-to-end analysis system.
+            </p>
+
+            <div>
+                Python · Node · Express
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+</main>
+
+
+
+<!-- =========================================
+     FOOTER
+========================================= -->
+
+<footer>
+
+    <div class="footer-logo">
+
+        <span class="logo-mark">
+            P
+        </span>
+
+        PitchVision
+
+    </div>
+
+
+    <span>
+        2026
+    </span>
+
+</footer>
+
+
+
+<script src="js/script.js"></script>
+
+</body>
+
+</html>

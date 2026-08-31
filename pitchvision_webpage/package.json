@@ -1,0 +1,13 @@
+{
+  "name": "pitchvision",
+  "version": "1.0.0",
+  "description": "PitchVision - AI Powered Football Match Analysis",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
