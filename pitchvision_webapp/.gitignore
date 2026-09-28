@@ -1,0 +1,34 @@
+# Node
+backend/node_modules/
+npm-debug.log*
+
+# Python
+python_pipeline/.venv/
+python_pipeline/__pycache__/
+*.pyc
+
+# Model files
+*.pt
+*.pth
+*.onnx
+*.h5
+*.keras
+*.safetensors
+
+# Generated files
+storage/uploads/*
+storage/outputs/*
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Logs
+*.log

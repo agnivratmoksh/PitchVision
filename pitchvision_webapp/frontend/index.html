@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f6f3">
+  <title>PitchVision — Football Intelligence</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+<header class="nav">
+  <a href="#top" class="brand">
+    PITCHVISION<span>.</span>
+  </a>
+  <nav>
+    <a href="#analyze">Analyze</a>
+    <a href="#pipeline">Pipeline</a>
+    <a href="#results">Results</a>
+  </nav>
+</header>
+
+
+<main id="top">
+
+<!-- ========================================= -->
+<!-- HERO -->
+<!-- ========================================= -->
+
+<section class="hero">
+  <div class="eyebrow">
+    FOOTBALL / COMPUTER VISION / TACTICAL ANALYTICS
+  </div>
+
+  <h1>
+    See the game<br>
+    <span>as data.</span>
+  </h1>
+
+  <p>
+    Upload match footage and turn it into
+    player detections, team structure,
+    pitch positions and tactical metrics.
+  </p>
+
+  <a href="#analyze" class="button dark">
+    Start analysis
+    <span>↓</span>
+  </a>
+</section>
+
+
+<!-- ========================================= -->
+<!-- ANALYZE -->
+<!-- ========================================= -->
+
+<section id="analyze" class="section">
+
+  <div class="section-label">
+    <span>01</span>
+    <div>
+      <strong>ANALYZE</strong>
+      <small>IMAGE / VIDEO INPUT</small>
+    </div>
+  </div>
+
+  <div id="dropzone" class="dropzone">
+    <input
+      id="fileInput"
+      type="file"
+      accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska"
+      hidden
+    >
+
+    <div class="plus">+</div>
+
+    <h2>Drop match footage</h2>
+
+    <p>
+      <button id="browseBtn" class="inline-button">Browse files</button>
+      <span>or drag it here</span>
+    </p>
+
+    <small>JPG · PNG · WEBP · MP4 · MOV · AVI · MKV</small>
+  </div>
+
+
+  <!-- SELECTED FILE -->
+  <div id="selectedFile" class="selected hidden">
+    <div>
+      <span class="file-type" id="fileType">FILE</span>
+      <div>
+        <strong id="fileName">—</strong>
+        <small id="fileMeta">—</small>
+      </div>
+    </div>
+    <button id="removeFile" class="remove">Remove</button>
+  </div>
+
+
+  <!-- ANALYZE BUTTON -->
+  <button id="analyzeBtn" class="button dark full" disabled>
+    Analyze footage
+    <span>→</span>
+  </button>
+
+
+  <!-- PROGRESS -->
+  <div id="progress" class="progress hidden">
+    <div class="progress-head">
+      <span id="statusText">Uploading...</span>
+      <span id="statusPercent">0%</span>
+    </div>
+    <div class="progress-track">
+      <div id="progressFill"></div>
+    </div>
+    <small id="pipelineStatus">Waiting</small>
+  </div>
+
+
+  <!-- ERROR -->
+  <div id="errorBox" class="error hidden"></div>
+
+</section>
+
+
+<!-- ========================================= -->
+<!-- PIPELINE -->
+<!-- ========================================= -->
+
+<section id="pipeline" class="section">
+
+  <div class="section-label">
+    <span>02</span>
+    <div>
+      <strong>PIPELINE</strong>
+      <small>FRAME → INSIGHT</small>
+    </div>
+  </div>
+
+  <div class="pipeline">
+    <div>
+      <span>01</span>
+      <strong>Preprocess</strong>
+      <p>Normalize and prepare the input.</p>
+    </div>
+    <div>
+      <span>02</span>
+      <strong>Detect</strong>
+      <p>Find players, ball and officials.</p>
+    </div>
+    <div>
+      <span>03</span>
+      <strong>Classify</strong>
+      <p>Separate the two teams.</p>
+    </div>
+    <div>
+      <span>04</span>
+      <strong>Map</strong>
+      <p>Convert image coordinates to pitch space.</p>
+    </div>
+    <div>
+      <span>05</span>
+      <strong>Formation</strong>
+      <p>Estimate team structure and shape.</p>
+    </div>
+    <div>
+      <span>06</span>
+      <strong>Analyze</strong>
+      <p>Generate tactical metrics.</p>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ========================================= -->
+<!-- RESULTS -->
+<!-- ========================================= -->
+
+<section id="results" class="section hidden">
+
+  <div class="section-label">
+    <span>03</span>
+    <div>
+      <strong>RESULTS</strong>
+      <small>MODEL OUTPUT</small>
+    </div>
+  </div>
+
+  <div id="resultMedia" class="result-media"></div>
+
+  <div id="metricsGrid" class="metrics"></div>
+
+  <div class="result-media secondary">
+    <figure>
+      <figcaption>TEAM FORMATIONS</figcaption>
+      <img id="formationImage" alt="Team formations">
+    </figure>
+    <figure>
+      <figcaption>POSITIONAL HEATMAP</figcaption>
+      <img id="heatmapImage" alt="Positional heatmap">
+    </figure>
+  </div>
+
+  <div class="result-actions">
+    <a id="downloadOutput" class="button dark" href="#" download>
+      Download output
+      <span>↓</span>
+    </a>
+    <button id="newAnalysis" class="button light">
+      New analysis
+    </button>
+  </div>
+
+</section>
+
+</main>
+
+
+<footer>
+  <span>PITCHVISION.</span>
+  <span>DETECTION → MAPPING → ANALYTICS</span>
+  <span>2026</span>
+</footer>
+
+
+<script src="/app.js"></script>
+
+</body>
+</html>
