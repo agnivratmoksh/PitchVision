@@ -1,0 +1,361 @@
+# ======================================================
+# PITCHVISION .gitignore
+# ======================================================
+
+
+# ------------------------------------------------------
+# ENVIRONMENT VARIABLES / SECRETS
+# ------------------------------------------------------
+
+.env
+.env.*
+!.env.example
+
+*.secret
+secrets/
+credentials/
+*.pem
+*.key
+
+
+# ------------------------------------------------------
+# PYTHON
+# ------------------------------------------------------
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.so
+
+.Python
+
+# Test, type-checker, and linter caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+htmlcov/
+
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+
+pip-wheel-metadata/
+share/python-wheels/
+
+*.egg-info/
+.installed.cfg
+*.egg
+
+
+# ------------------------------------------------------
+# PYTHON VIRTUAL ENVIRONMENTS
+# ------------------------------------------------------
+
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+
+# ------------------------------------------------------
+# JUPYTER
+# ------------------------------------------------------
+
+.ipynb_checkpoints/
+
+
+# ------------------------------------------------------
+# PYTORCH / MACHINE LEARNING
+# ------------------------------------------------------
+
+# Model checkpoints
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.safetensors
+*.bin
+*.pkl
+*.pickle
+*.joblib
+*.npy
+*.npz
+
+# Training outputs
+runs/
+wandb/
+mlruns/
+lightning_logs/
+
+# TensorBoard
+tensorboard/
+events.out.tfevents.*
+
+
+# ------------------------------------------------------
+# DATASETS
+# ------------------------------------------------------
+
+datasets/
+dataset/
+data/
+raw_data/
+processed_data/
+
+*.csv
+*.xls
+*.xlsx
+*.parquet
+*.feather
+
+# If you have small CSV files that MUST be committed,
+# add an exception below:
+#
+# !frontend/example.csv
+
+
+# ------------------------------------------------------
+# GENERATED ANALYSIS OUTPUT
+# ------------------------------------------------------
+
+api_results/
+results/
+outputs/
+output/
+analysis_results/
+
+keypoint_cache/
+cache/
+tmp/
+temp/
+
+*.jsonl
+
+
+# ------------------------------------------------------
+# IMAGES / VIDEOS
+# ------------------------------------------------------
+
+# Uploaded files
+uploads/
+uploaded/
+user_uploads/
+
+# Generated images
+generated/
+visualizations/
+
+# Large media files
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tiff
+*.webp
+
+
+# ------------------------------------------------------
+# NODE.JS
+# ------------------------------------------------------
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+.npm/
+.yarn/
+.pnpm-store/
+*.tsbuildinfo
+
+.nyc_output/
+coverage/
+
+*.tgz
+
+
+# ------------------------------------------------------
+# NODE BUILD OUTPUT
+# ------------------------------------------------------
+
+dist/
+build/
+.next/
+.nuxt/
+.output/
+.cache/
+
+
+# ------------------------------------------------------
+# CLOUD / DEPLOYMENT
+# ------------------------------------------------------
+
+.cloudflare/
+cloudflared/
+.tunnel/
+*.log
+
+
+# ------------------------------------------------------
+# PM2
+# ------------------------------------------------------
+
+.pm2/
+pids/
+logs/
+
+*.pid
+
+
+# ------------------------------------------------------
+# LOG FILES
+# ------------------------------------------------------
+
+*.log
+logs/
+
+
+# ------------------------------------------------------
+# MACOS
+# ------------------------------------------------------
+
+.DS_Store
+.AppleDouble
+.LSOverride
+.idea/
+*.swp
+*.swo
+
+Icon
+
+._*
+
+.Spotlight-V100
+.Trashes
+.fseventsd
+
+
+# ------------------------------------------------------
+# WINDOWS
+# ------------------------------------------------------
+
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+
+Desktop.ini
+
+
+# ------------------------------------------------------
+# LINUX
+# ------------------------------------------------------
+
+.directory
+
+
+# ------------------------------------------------------
+# VS CODE
+# ------------------------------------------------------
+
+.vscode/
+
+# Uncomment if you want to keep shared VS Code settings:
+# !.vscode/settings.json
+# !.vscode/extensions.json
+
+
+# ------------------------------------------------------
+# JETBRAINS
+# ------------------------------------------------------
+
+.idea/
+*.iml
+
+
+# ------------------------------------------------------
+# SWAP / TEMP FILES
+# ------------------------------------------------------
+
+*.swp
+*.swo
+*~
+*.tmp
+*.temp
+
+
+# ------------------------------------------------------
+# TEST / DEBUG FILES
+# ------------------------------------------------------
+
+test_output/
+debug/
+debug_output/
+
+*.dump
+*.bak
+*.backup
+
+
+# ------------------------------------------------------
+# LOCAL CONFIGURATION
+# ------------------------------------------------------
+
+config.local.*
+settings.local.*
+local.*
+
+
+# ------------------------------------------------------
+# DATABASES
+# ------------------------------------------------------
+
+*.db
+*.sqlite
+*.sqlite3
+
+
+# ------------------------------------------------------
+# ARCHIVES
+# ------------------------------------------------------
+
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+
+# ------------------------------------------------------
+# GENERATED FRONTEND FILES
+# ------------------------------------------------------
+
+frontend/.cache/
+frontend/dist/
+frontend/build/
+
+
+# ------------------------------------------------------
+# OS / EDITOR
+# ------------------------------------------------------
+
+*.orig
+*.rej

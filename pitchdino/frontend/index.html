@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f5f5f1" />
+  <title>PitchVision — Football Computer Vision</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<header class="nav">
+  <a class="brand" href="/" aria-label="PitchVision home">PITCH<span>VISION</span></a>
+  <div class="model">DINOv2 · Faster R-CNN · Roboflow</div>
+
+  <div class="nav-right">
+  <div class="model">
+    DINOv2 · Faster R-CNN · Roboflow
+  </div>
+
+  <a
+    class="about-link"
+    href="https://agnivratmoksh.github.io/PitchVision/pitchvision_webpage/public/"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    ABOUT
+  </a>
+</div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">TACTICAL FOOTBALL COMPUTER VISION</p>
+      <h1>See the game<br /><em>as data.</em></h1>
+      <p class="lede">
+        Upload a frame or match clip. PitchVision detects players, the ball and referees,
+        calibrates the pitch, maps positions into pitch coordinates, and prepares the match
+        state for tactical analysis.
+      </p>
+      <div class="hero-actions">
+        <button id="heroUploadBtn" class="button primary hero-button" type="button">Start analysis</button>
+        <a class="button ghost hero-link" href="#how-it-works">How it works</a>
+      </div>
+    </div>
+
+    <div class="hero-meta" aria-label="Pipeline overview">
+      <div><strong>01</strong><span>Detect</span></div>
+      <div><strong>02</strong><span>Calibrate</span></div>
+      <div><strong>03</strong><span>Project</span></div>
+      <div><strong>04</strong><span>Analyze</span></div>
+    </div>
+  </section>
+
+  <section class="intro-strip" id="how-it-works">
+    <div class="intro-item">
+      <span class="intro-number">01</span>
+      <div><strong>Object detection</strong><p>Players, ball and referee candidates from the vision model.</p></div>
+    </div>
+    <div class="intro-item">
+      <span class="intro-number">02</span>
+      <div><strong>Pitch calibration</strong><p>Roboflow field keypoints establish the playing-field geometry.</p></div>
+    </div>
+    <div class="intro-item">
+      <span class="intro-number">03</span>
+      <div><strong>Tactical state</strong><p>Projected positions become structured data for downstream analysis.</p></div>
+    </div>
+  </section>
+
+  <section class="workspace" id="workspace">
+    <div class="section-kicker">
+      <span class="eyebrow">INPUT</span>
+      <span class="section-rule"></span>
+      <span class="section-note">IMAGE / VIDEO</span>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="upload-card" id="dropZone">
+      <input id="fileInput" class="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/bmp,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm" />
+
+      <div class="upload-icon" aria-hidden="true">＋</div>
+      <p class="upload-eyebrow">PITCHVISION INPUT</p>
+      <h2>Drop an image or video</h2>
+      <p class="upload-description">JPG, PNG, WEBP, MP4, MOV, AVI, MKV or WEBM</p>
+
+      <div class="upload-actions">
+        <label id="browseBtn" class="button secondary file-picker-button" for="fileInput">Choose file</label>
+      </div>
+
+      <p class="upload-footnote">Your browser uploads the selected file to the PitchVision analysis pipeline.</p>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="preview-card hidden" id="previewCard">
+      <div class="preview-head">
+        <div>
+          <span class="eyebrow">BALL INPUT</span>
+          <h2 id="fileName">—</h2>
+          <p id="fileMeta" class="file-meta">Ready for analysis</p>
+        </div>
+        <label id="clearBtn" class="text-button change-file-button" for="fileInput">Change file</label>
+      </div>
+
+      <div class="stage" id="stage">
+        <img id="imagePreview" class="media hidden" alt="Selected football image preview" draggable="false" />
+        <video id="videoPreview" class="media hidden" controls muted playsinline preload="metadata"></video>
+        <canvas id="overlay" class="overlay not-marking" aria-label="Ball selection overlay"></canvas>
+
+        <div id="markingBanner" class="marking-banner hidden">🟠 BALL MARKING MODE — drag a rectangle around the ball</div>
+        <div id="ballHint" class="hint">Automatic detection is preferred. Mark the ball manually if DINO misses or misidentifies it.</div>
+        <div id="mediaLoading" class="media-loading hidden">Loading preview…</div>
+      </div>
+
+      <div class="ball-controls">
+        <button id="markBallBtn" class="button secondary" type="button">Mark / replace ball</button>
+        <button id="clearBallBtn" class="button ghost" type="button">Clear ball box</button>
+        <span id="ballStatus" class="ball-status-badge mode-auto">
+          <span class="ball-status-dot"></span>Automatic ball detection enabled
+        </span>
+      </div>
+
+      <div class="settings">
+        <label>Detection interval <input id="detectEvery" type="number" min="1" step="1" value="1" /></label>
+        <label>Pitch recalibration <input id="calibrationEvery" type="number" min="1" step="1" value="30" /> frames</label>
+      </div>
+
+      <button id="analyzeBtn" class="button primary" type="button">Run PitchVision analysis</button>
+    </div>
+  </section>
+
+  <section id="status" class="status hidden" aria-live="polite"></section>
+
+  <section id="results" class="results hidden">
+    <div class="section-head">
+      <span class="eyebrow">ANALYSIS</span>
+      <h2>Match state</h2>
+      <p class="results-lede">Structured output from the detection, calibration and tactical analysis pipeline.</p>
+    </div>
+
+    <div id="metrics" class="metrics"></div>
+    <div id="calibCard" class="calib-card hidden"></div>
+    <div id="warnings" class="warnings"></div>
+    <div id="visuals" class="visuals"></div>
+    <pre id="json" class="json"></pre>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>PITCHVISION</span>
+  <span>Football computer vision · tactical analysis</span>
+</footer>
+
+<script src="/app.js" defer></script>
+</body>
+</html>
