@@ -1,9 +1,0 @@
-fastapi
-uvicorn[standard]
-python-multipart
-ultralytics
-opencv-python
-numpy
-scikit-learn
-matplotlib
-pillow
