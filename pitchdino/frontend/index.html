@@ -11,12 +11,8 @@
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PitchVision home">PITCH<span>VISION</span></a>
-  <div class="model">DINOv2 · Faster R-CNN · Roboflow</div>
-
   <div class="nav-right">
-  <div class="model">
-    DINOv2 · Faster R-CNN · Roboflow
-  </div>
+    <div class="model">DINOv2 · Faster R-CNN · Roboflow</div>
 
   <a
     class="about-link"
@@ -131,19 +127,83 @@
 
   <section id="status" class="status hidden" aria-live="polite"></section>
 
-  <section id="results" class="results hidden">
-    <div class="section-head">
-      <span class="eyebrow">ANALYSIS</span>
-      <h2>Match state</h2>
-      <p class="results-lede">Structured output from the detection, calibration and tactical analysis pipeline.</p>
+  <!-- =====================================================
+     OUTPUTS
+===================================================== -->
+
+<section id="results" class="results hidden">
+
+  <div class="section-kicker">
+    <span class="eyebrow">OUTPUTS</span>
+    <span class="section-rule"></span>
+    <span class="section-note">ANALYSIS RESULTS</span>
+  </div>
+
+  <div class="section-head">
+    <span class="eyebrow">PITCHVISION ANALYSIS</span>
+
+    <h2>Match state</h2>
+
+    <p class="results-lede">
+      Visual outputs generated from detection, pitch calibration
+      and tactical analysis.
+    </p>
+  </div>
+
+  <!-- SUMMARY METRICS -->
+
+  <div id="metrics" class="metrics"></div>
+
+  <!-- WARNINGS -->
+
+  <div id="warnings" class="warnings"></div>
+
+  <!-- =================================================
+       VISUAL OUTPUTS
+  ================================================== -->
+
+  <div class="output-section">
+
+    <div class="output-header">
+
+      <div>
+        <span class="eyebrow">VISUAL OUTPUTS</span>
+        <h3>Analysis visualizations</h3>
+      </div>
+
+      <div
+        id="visualCounter"
+        class="visual-counter"
+      >
+        00 / 00
+      </div>
+
     </div>
 
-    <div id="metrics" class="metrics"></div>
-    <div id="calibCard" class="calib-card hidden"></div>
-    <div id="warnings" class="warnings"></div>
-    <div id="visuals" class="visuals"></div>
+    <div
+      id="visuals"
+      class="visuals"
+      aria-live="polite"
+    ></div>
+
+  </div>
+
+  <!-- JSON -->
+
+  <div class="data-section">
+
+    <div class="data-header">
+      <div>
+        <span class="eyebrow">RAW DATA</span>
+        <h3>Analysis JSON</h3>
+      </div>
+    </div>
+
     <pre id="json" class="json"></pre>
-  </section>
+
+  </div>
+
+</section>
 </main>
 
 <footer class="footer">

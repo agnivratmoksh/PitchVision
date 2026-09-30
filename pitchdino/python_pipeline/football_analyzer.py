@@ -48,7 +48,10 @@ except ImportError:
 # CONFIG
 # =====================================================================================================
 CONFIG = {
-    "checkpoint_path": os.environ.get("FOOTBALL_CKPT", ""),
+    "checkpoint_path": os.environ.get(
+        "FOOTBALL_CKPT",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "last_checkpoint.pt"),
+    ),
     "score_threshold": 0.5,
     "score_threshold_per_class": {"player": 0.6},     # a little lower than the notebook: keeps more players
     "nms_iou_threshold": 0.4,
@@ -133,69 +136,194 @@ def r1(x): return None if x is None else round(float(x), 2)
 # =====================================================================================================
 # 1. DETECTOR  (your DINOv2 + Faster R-CNN checkpoint, loaded exactly like the notebook)
 # =====================================================================================================
-_DET = {}
+_DET = {}                # cache keyed by absolute checkpoint path
 
-def load_detector(ckpt):
-    if "model" in _DET:
+
+def resolve_checkpoint_path(ckpt=None):
+    """Find a valid detector checkpoint using the explicit path, project defaults, or Kaggle mounts."""
+    candidates = [
+        ckpt,
+        CONFIG.get("checkpoint_path"),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "last_checkpoint.pt"),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "best_detector.pt"),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "best.pt"),
+        "models/last_checkpoint.pt",
+        "models/best_detector.pt",
+        "models/best.pt",
+        "last_checkpoint.pt",
+        "best_detector.pt",
+        "best.pt",
+    ]
+    seen = set()
+    for candidate in candidates:
+        if not candidate or candidate in seen:
+            continue
+        seen.add(candidate)
+        if os.path.isfile(candidate):
+            return os.path.abspath(candidate)
+
+    # Useful when this file is run directly inside Kaggle.
+    if os.path.isdir("/kaggle/input"):
+        for dirpath, _, filenames in os.walk("/kaggle/input"):
+            for fn in ("best_detector.pt", "last_checkpoint.pt", "best.pt"):
+                if fn in filenames:
+                    return os.path.abspath(os.path.join(dirpath, fn))
+
+    raise FileNotFoundError(
+        f"No detector checkpoint found. Tried '{ckpt}' and the standard models/ locations. "
+        "Use --checkpoint /path/to/model.pt or set FOOTBALL_CKPT."
+    )
+
+
+def load_detector(ckpt=None):
+    """Reconstruct and load the DINOv2 + Faster R-CNN detector from its checkpoint."""
+    ckpt_path = resolve_checkpoint_path(ckpt)
+    if _DET.get("ckpt") == ckpt_path:
         return _DET
-    import torch, torch.nn as nn
+
+    import torch
+    import torch.nn as nn
     from torchvision.models.detection import FasterRCNN
     from torchvision.models.detection.rpn import AnchorGenerator
     from torchvision.models.detection.transform import GeneralizedRCNNTransform
     from torchvision.ops import MultiScaleRoIAlign
+    from torchvision.ops import nms
+
     PATCH = 14
-    DIMS = {"dinov2_vits14": 384, "dinov2_vitb14": 768, "dinov2_vitl14": 1024, "dinov2_vitg14": 1536}
+    DIMS = {
+        "dinov2_vits14": 384,
+        "dinov2_vitb14": 768,
+        "dinov2_vitl14": 1024,
+        "dinov2_vitg14": 1536,
+    }
     MEAN, STD = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     class Backbone(nn.Module):
         def __init__(self, name):
             super().__init__()
+            if name not in DIMS:
+                raise ValueError(f"Unsupported DINOv2 backbone '{name}'. Expected one of {sorted(DIMS)}")
             self.model = torch.hub.load("facebookresearch/dinov2", name, pretrained=False)
-            self.embed_dim = DIMS[name]; self.out_channels = self.embed_dim
-            for p in self.model.parameters(): p.requires_grad = False
+            self.embed_dim = DIMS[name]
+            self.out_channels = self.embed_dim
+            for p in self.model.parameters():
+                p.requires_grad = False
             self.model.eval()
+
         def forward(self, x):
             b, c, h, w = x.shape
             with torch.no_grad():
                 f = self.model.forward_features(x)["x_norm_patchtokens"]
-            return {"0": f.permute(0, 2, 1).reshape(b, self.embed_dim, h // PATCH, w // PATCH)}
+            gh, gw = h // PATCH, w // PATCH
+            expected_tokens = gh * gw
+            if f.shape[1] != expected_tokens:
+                raise RuntimeError(
+                    f"DINOv2 patch-token shape mismatch: got {f.shape[1]} tokens, "
+                    f"expected {expected_tokens} for {h}x{w}. Check the checkpoint/model image size."
+                )
+            return {"0": f.permute(0, 2, 1).reshape(b, self.embed_dim, gh, gw)}
 
-    ck = torch.load(ckpt, map_location=dev)
-    tc, names = ck["config"], ck["class_names"]
-    m = FasterRCNN(Backbone(tc["model_name"]), num_classes=len(names) + 1,
-                   rpn_anchor_generator=AnchorGenerator(sizes=((16, 32, 64, 128, 256),), aspect_ratios=((0.5, 1.0, 2.0),)),
-                   box_roi_pool=MultiScaleRoIAlign(featmap_names=["0"], output_size=7, sampling_ratio=2),
-                   min_size=tc["img_size"], max_size=tc["img_size"], image_mean=MEAN, image_std=STD)
-    m.transform = GeneralizedRCNNTransform(min_size=tc["img_size"], max_size=tc["img_size"],
-                                           image_mean=MEAN, image_std=STD, size_divisible=PATCH)
-    m.load_state_dict(ck["model_state_dict"]); m.to(dev).eval()
-    _DET.update(model=m, names=names, dev=dev)
+    checkpoint = torch.load(ckpt_path, map_location=dev)
+    if not isinstance(checkpoint, dict) or "config" not in checkpoint or "class_names" not in checkpoint or "model_state_dict" not in checkpoint:
+        raise ValueError(
+            f"Checkpoint '{ckpt_path}' does not contain the expected keys: config, class_names, model_state_dict."
+        )
+
+    tc = checkpoint["config"]
+    names = checkpoint["class_names"]
+    model = FasterRCNN(
+        Backbone(tc["model_name"]),
+        num_classes=len(names) + 1,
+        rpn_anchor_generator=AnchorGenerator(
+            sizes=((16, 32, 64, 128, 256),),
+            aspect_ratios=((0.5, 1.0, 2.0),),
+        ),
+        box_roi_pool=MultiScaleRoIAlign(
+            featmap_names=["0"],
+            output_size=7,
+            sampling_ratio=2,
+        ),
+        min_size=tc["img_size"],
+        max_size=tc["img_size"],
+        image_mean=MEAN,
+        image_std=STD,
+    )
+    model.transform = GeneralizedRCNNTransform(
+        min_size=tc["img_size"],
+        max_size=tc["img_size"],
+        image_mean=MEAN,
+        image_std=STD,
+        size_divisible=PATCH,
+    )
+
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.to(dev).eval()
+
+    _DET.clear()
+    _DET.update(ckpt=ckpt_path, model=model, names=names, dev=dev, nms=nms)
+    print(f"[Detector] loaded: {ckpt_path}", flush=True)
+    print(f"[Detector] device: {dev}", flush=True)
+    print(f"[Detector] classes: {names}", flush=True)
     return _DET
 
 
-def run_detection(img_pil, ckpt):
+def run_detection(img_pil, ckpt=None):
     import torch
     import torchvision.transforms.functional as TF
-    from torchvision.ops import nms
-    d = load_detector(ckpt); m, names, dev = d["model"], d["names"], d["dev"]
+
+    d = load_detector(ckpt)
+    model, names, dev = d["model"], d["names"], d["dev"]
     with torch.no_grad():
-        pred = m([TF.to_tensor(img_pil).to(dev)])[0]
-    boxes, labels, scores = pred["boxes"].cpu(), pred["labels"].cpu(), pred["scores"].cpu()
-    per = CONFIG["score_threshold_per_class"] or {}
-    keep = torch.tensor([bool(scores[i] >= per.get(names[labels[i].item() - 1], CONFIG["score_threshold"]))
-                         for i in range(len(scores))], dtype=torch.bool)
+        pred = model([TF.to_tensor(img_pil).to(dev)])[0]
+
+    boxes = pred["boxes"].cpu()
+    labels = pred["labels"].cpu()
+    scores = pred["scores"].cpu()
+
+    per = CONFIG.get("score_threshold_per_class") or {}
+    keep = torch.tensor(
+        [
+            bool(
+                scores[i] >= per.get(
+                    names[labels[i].item() - 1],
+                    CONFIG["score_threshold"],
+                )
+            )
+            for i in range(len(scores))
+        ],
+        dtype=torch.bool,
+    )
     boxes, labels, scores = boxes[keep], labels[keep], scores[keep]
+
+    # Faster R-CNN already suppresses many duplicates, but an explicit per-class NMS
+    # keeps the output stable for the tactical layer.
     idx = []
+    nms_iou = CONFIG.get("nms_iou_threshold", 0.4)
     for c in labels.unique():
         cm = (labels == c).nonzero(as_tuple=True)[0]
-        idx += cm[nms(boxes[cm], scores[cm], CONFIG["nms_iou_threshold"])].tolist()
+        idx.extend(cm[torchvision_nms(boxes[cm], scores[cm], nms_iou)].tolist())
+
     out = []
     for i in idx:
+        label_id = labels[i].item() - 1
+        if label_id < 0 or label_id >= len(names):
+            continue
         x1, y1, x2, y2 = boxes[i].tolist()
-        out.append({"class": names[labels[i].item() - 1], "confidence": float(scores[i]),
-                    "bbox_px": [x1, y1, x2, y2], "ground_point_px": [(x1 + x2) / 2, y2]})
+        out.append({
+            "class": names[label_id],
+            "confidence": float(scores[i]),
+            "bbox_px": [x1, y1, x2, y2],
+            "ground_point_px": [(x1 + x2) / 2, y2],
+        })
+
     return out
+
+
+def torchvision_nms(boxes, scores, iou_threshold):
+    """Small wrapper kept separate so the detector has one clear NMS dependency."""
+    from torchvision.ops import nms
+    return nms(boxes, scores, iou_threshold)
 
 
 # =====================================================================================================
@@ -1112,69 +1240,8 @@ def analyze_image(image_path, out_dir, checkpoint=None, passer=None, attack_dire
 # =====================================================================================================
 # 8. CLI + FASTAPI
 # =====================================================================================================
-def create_app(checkpoint, root="./api_results"):
-    from fastapi import FastAPI, UploadFile, File, Form
-    from fastapi.middleware.cors import CORSMiddleware
-    from fastapi.staticfiles import StaticFiles
-    os.makedirs(root, exist_ok=True)
-    app = FastAPI(title="Football image analyzer")
-    app.add_middleware(CORSMiddleware, allow_origins=os.environ.get("ALLOWED_ORIGINS", "*").split(","),
-                       allow_methods=["*"], allow_headers=["*"])
-    app.mount("/results", StaticFiles(directory=root), name="results")
-
-    @app.get("/health")
-    def health():
-        return {"ok": True, "service": "football_analyzer", "roboflow_configured": bool(CONFIG["roboflow_api_key"])}
-
-    @app.post("/analyze")
-    def analyze(file: UploadFile = File(...), passer_team: str = Form(None), passer_index: int = Form(None),
-                attack_red: str = Form(None), attack_blue: str = Form(None), ball_bbox: str = Form(None),
-                detect_every: int = Form(None), calibration_every: int = Form(None)):
-        job = uuid.uuid4().hex[:12]
-        folder = os.path.join(root, job)
-        os.makedirs(folder, exist_ok=True)
-        ext = os.path.splitext(file.filename or ".jpg")[1].lower()
-        if ext not in (".jpg", ".jpeg", ".png", ".bmp", ".webp"):
-            raise ValueError("Current Python pipeline accepts images only (.jpg/.jpeg/.png/.bmp/.webp). Video support is separate.")
-        src = os.path.join(folder, "input" + ext)
-        with open(src, "wb") as f:
-            shutil.copyfileobj(file.file, f)
-        print(f"[API] received: {file.filename} -> {src} ({os.path.getsize(src)} bytes)", flush=True)
-        print(f"[API] ball_bbox: {ball_bbox or 'none'}", flush=True)
-        ov = {"team": passer_team, "index": passer_index} if passer_team and passer_index is not None else None
-        ad = {k:v for k,v in (("red",attack_red),("blue",attack_blue)) if v}
-        res = analyze_image(src, folder, checkpoint, ov, ad or None, ball_bbox=ball_bbox)
-        base = f"/results/{job}/"
-        def url(x):
-            if isinstance(x, dict): return {k:url(v) for k,v in x.items()}
-            return base + x
-        res["files"] = url(res["files"]); res["json_url"] = base + "analysis.json"
-        return json.loads(json.dumps(res, default=to_py))
-    return app
-
-
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("inputs", nargs="*"); ap.add_argument("--out", default="./results")
-    ap.add_argument("--checkpoint", default=CONFIG["checkpoint_path"]); ap.add_argument("--serve", action="store_true")
-    ap.add_argument("--port", type=int, default=8000)
-    a = ap.parse_args()
-    if a.serve:
-        import uvicorn; uvicorn.run(create_app(a.checkpoint), host="0.0.0.0", port=a.port); return
-    exts = (".jpg", ".jpeg", ".png", ".bmp", ".webp"); paths = []
-    for i in a.inputs:
-        paths += [os.path.join(i, f) for f in sorted(os.listdir(i)) if f.lower().endswith(exts)] if os.path.isdir(i) else [i]
-    for pth in paths:
-        stem = os.path.splitext(os.path.basename(pth))[0]
-        try:
-            r = analyze_image(pth, os.path.join(a.out, stem), a.checkpoint)
-            rec = {t: v.get("recommendation", {}).get("reason") for t, v in r["reports"].items()}
-            print(f"{stem}: {'SKIPPED - ' + r['skip_reason'] if r['skipped'] else 'ok'} {rec if rec else ''}")
-        except RuntimeError as e:
-            print("STOPPING:", e); break
-        except Exception as e:
-            print(f"{stem}: error {e}")
-
+# The final FastAPI/CLI implementation lives in the v2 section below so image and video uploads
+# share one endpoint and one checkpoint-resolution path.
 
 
 

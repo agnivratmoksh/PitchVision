@@ -1,15 +1,23 @@
 "use strict";
 
-/* ======================================================
-   DOM HELPERS
-====================================================== */
+/* =========================================================
+   PITCHVISION FRONTEND
+
+   Features:
+   - Image + video upload
+   - Drag/drop
+   - Manual ball selection
+   - Backend analysis
+   - Results carousel
+   - Keyboard carousel navigation
+========================================================= */
+
+
+/* =========================================================
+   DOM
+========================================================= */
 
 const $ = (id) => document.getElementById(id);
-
-
-/* ======================================================
-   DOM ELEMENTS
-====================================================== */
 
 const fileInput = $("fileInput");
 const dropZone = $("dropZone");
@@ -22,13 +30,13 @@ const videoPreview = $("videoPreview");
 
 const canvas = $("overlay");
 const ctx = canvas?.getContext("2d");
+
 const stage = $("stage");
 const mediaLoading = $("mediaLoading");
 
 const markBallBtn = $("markBallBtn");
 const clearBallBtn = $("clearBallBtn");
 const clearBtn = $("clearBtn");
-
 const analyzeBtn = $("analyzeBtn");
 
 const statusBox = $("status");
@@ -38,44 +46,42 @@ const markingBanner = $("markingBanner");
 const ballStatus = $("ballStatus");
 
 
-/* ======================================================
+/* =========================================================
    STATE
-====================================================== */
+========================================================= */
 
 let file = null;
 let objectUrl = null;
 
 let marking = false;
 let start = null;
-
-/*
- * Ball box is ALWAYS stored in the original media
- * coordinate system:
- *
- * [x1, y1, x2, y2]
- *
- * Example for a 1920x1080 image:
- * [850, 420, 890, 460]
- */
 let ballBox = null;
 
 let resizeFrame = 0;
 
 
-/* ======================================================
+/* =========================================================
+   RESULT CAROUSEL STATE
+========================================================= */
+
+let resultImages = [];
+let currentResultIndex = 0;
+
+
+/* =========================================================
    FILE TYPES
-====================================================== */
+========================================================= */
 
 const IMAGE_EXTENSIONS =
-  /\.(jpg|jpeg|png|bmp|webp)$/i;
+  /\.(jpg|jpeg|png|bmp|webp|gif|avif|tif|tiff)$/i;
 
 const VIDEO_EXTENSIONS =
-  /\.(mp4|mov|avi|mkv|webm)$/i;
+  /\.(mp4|mov|avi|mkv|webm|m4v|mpeg|mpg)$/i;
 
 
-/* ======================================================
-   INITIALIZATION CHECK
-====================================================== */
+/* =========================================================
+   INITIALIZATION
+========================================================= */
 
 if (
   !fileInput ||
@@ -92,35 +98,10 @@ if (
 }
 
 
-/* ======================================================
-   FILE PICKER
-====================================================== */
+/* =========================================================
+   HERO BUTTON
+========================================================= */
 
-/*
- * IMPORTANT:
- *
- * The latest HTML uses:
- *
- * <label for="fileInput">Choose file</label>
- *
- * Therefore we DO NOT programmatically call:
- *
- * fileInput.click()
- *
- * from the main Choose File button.
- *
- * The browser handles the native picker through
- * the label/input relationship.
- */
-
-
-/*
- * Hero upload button
- *
- * If the homepage contains a "Start analysis" or
- * similar button with id="heroUploadBtn", scroll to
- * the workspace.
- */
 heroUploadBtn?.addEventListener("click", () => {
 
   $("workspace")?.scrollIntoView({
@@ -131,40 +112,37 @@ heroUploadBtn?.addEventListener("click", () => {
 });
 
 
-/*
- * The browse button is a <label>, not a normal button.
- *
- * Therefore we intentionally do nothing here.
- */
+/* =========================================================
+   FILE PICKER
+========================================================= */
+
 browseBtn?.addEventListener("click", (event) => {
 
   /*
-   * Allow the browser's native label → input behavior.
+   * browseBtn is normally a label connected
+   * to the file input.
    */
+
+  event.stopPropagation();
+
 });
 
-
-/* ======================================================
-   FILE INPUT
-====================================================== */
 
 fileInput?.addEventListener("change", () => {
 
   const selectedFile =
     fileInput.files?.[0];
 
-  if (!selectedFile) {
-    return;
+  if (selectedFile) {
+    loadFile(selectedFile);
   }
-
-  loadFile(selectedFile);
 
 });
 
 
-/* ======================================================
-   DRAG AND DROP
-====================================================== */
+/* =========================================================
+   DRAG & DROP
+========================================================= */
 
 ["dragenter", "dragover"].forEach(
   (eventName) => {
@@ -211,33 +189,22 @@ dropZone?.addEventListener(
     const droppedFile =
       event.dataTransfer?.files?.[0];
 
-    if (!droppedFile) {
-      return;
+    if (droppedFile) {
+      loadFile(droppedFile);
     }
-
-    loadFile(droppedFile);
 
   }
 );
 
 
-/* ======================================================
-   RESET / CHANGE FILE
-====================================================== */
+/* =========================================================
+   FILE RESET
+========================================================= */
 
-/*
- * The Change File control in the latest HTML is a
- * <label for="fileInput">.
- *
- * We reset the current state before the browser
- * opens the file picker.
- */
 clearBtn?.addEventListener(
   "click",
   () => {
-
     resetApplication();
-
   }
 );
 
@@ -246,61 +213,37 @@ function resetApplication() {
 
   cancelMarking();
 
-  /*
-   * Release previous object URL.
-   */
   if (objectUrl) {
-
     URL.revokeObjectURL(objectUrl);
-
   }
 
   objectUrl = null;
 
   file = null;
-
   ballBox = null;
-
   start = null;
 
+  resultImages = [];
+  currentResultIndex = 0;
 
-  /*
-   * Remove old media sources.
-   */
   imagePreview.onload = null;
   imagePreview.onerror = null;
 
-  videoPreview.removeAttribute("src");
-
   imagePreview.removeAttribute("src");
 
+  videoPreview.removeAttribute("src");
   videoPreview.load();
 
-
-  /*
-   * Reset canvas.
-   */
   clearCanvas();
 
+  if (fileInput) {
+    fileInput.value = "";
+  }
 
-  /*
-   * Reset file input.
-   *
-   * This is important because it allows selecting
-   * the SAME file again.
-   */
-  fileInput.value = "";
-
-
-  /*
-   * Reset UI.
-   */
   previewCard?.classList.add("hidden");
-
   dropZone?.classList.remove("hidden");
 
   results?.classList.add("hidden");
-
   statusBox?.classList.add("hidden");
 
 
@@ -308,17 +251,21 @@ function resetApplication() {
     $("warnings").innerHTML = "";
   }
 
+
   if ($("visuals")) {
     $("visuals").innerHTML = "";
   }
+
 
   if ($("json")) {
     $("json").textContent = "";
   }
 
+
   if ($("fileName")) {
     $("fileName").textContent = "—";
   }
+
 
   if ($("fileMeta")) {
     $("fileMeta").textContent =
@@ -337,9 +284,58 @@ function resetApplication() {
 }
 
 
-/* ======================================================
+/* =========================================================
+   FILE TYPE DETECTION
+========================================================= */
+
+function detectFileKind(selectedFile) {
+
+  const name =
+    String(selectedFile.name || "");
+
+  const type =
+    String(selectedFile.type || "")
+      .toLowerCase();
+
+
+  const imageByMime =
+    type.startsWith("image/");
+
+  const videoByMime =
+    type.startsWith("video/");
+
+
+  const imageByExtension =
+    IMAGE_EXTENSIONS.test(name);
+
+  const videoByExtension =
+    VIDEO_EXTENSIONS.test(name);
+
+
+  if (
+    imageByMime ||
+    imageByExtension
+  ) {
+    return "image";
+  }
+
+
+  if (
+    videoByMime ||
+    videoByExtension
+  ) {
+    return "video";
+  }
+
+
+  return null;
+
+}
+
+
+/* =========================================================
    LOAD FILE
-====================================================== */
+========================================================= */
 
 function loadFile(selectedFile) {
 
@@ -348,66 +344,39 @@ function loadFile(selectedFile) {
   }
 
 
-  const isImage =
-    IMAGE_EXTENSIONS.test(
-      selectedFile.name
-    );
-
-  const isVideo =
-    VIDEO_EXTENSIONS.test(
-      selectedFile.name
-    );
+  const kind =
+    detectFileKind(selectedFile);
 
 
-  /*
-   * Validate extension.
-   */
-  if (!isImage && !isVideo) {
+  if (!kind) {
 
     setStatus(
-      "Unsupported file type. Use JPG, PNG, WEBP, BMP, MP4, MOV, AVI, MKV or WEBM.",
+      `Unsupported media type: ${
+        selectedFile.type || "unknown"
+      }. Please choose JPG, PNG, WEBP, BMP, MP4, MOV, AVI, MKV or WEBM.`,
       true
     );
 
     return;
-
   }
 
 
-  /*
-   * Release previous object URL.
-   */
   if (objectUrl) {
-
     URL.revokeObjectURL(objectUrl);
-
   }
 
 
-  /*
-   * Save selected file.
-   */
   file = selectedFile;
 
   objectUrl =
-    URL.createObjectURL(
-      selectedFile
-    );
+    URL.createObjectURL(selectedFile);
 
-
-  /*
-   * Reset ball selection.
-   */
   ballBox = null;
 
   cancelMarking();
-
   clearCanvas();
 
 
-  /*
-   * Update UI.
-   */
   dropZone?.classList.add("hidden");
 
   previewCard?.classList.remove("hidden");
@@ -429,31 +398,22 @@ function loadFile(selectedFile) {
 
     $("fileMeta").textContent =
       `${formatBytes(selectedFile.size)} · ${
-        isVideo ? "Video" : "Image"
+        kind === "video"
+          ? "Video"
+          : "Image"
       }`;
 
   }
 
 
-  /*
-   * Hide both media elements first.
-   */
-  imagePreview.classList.add("hidden");
-
-  videoPreview.classList.add("hidden");
+  imagePreview?.classList.add("hidden");
+  videoPreview?.classList.add("hidden");
 
 
-  /*
-   * Load correct media type.
-   */
-  if (isVideo) {
-
-    loadVideo(selectedFile);
-
+  if (kind === "video") {
+    loadVideo();
   } else {
-
-    loadImage(selectedFile);
-
+    loadImage();
   }
 
 
@@ -465,22 +425,15 @@ function loadFile(selectedFile) {
 }
 
 
-/* ======================================================
-   IMAGE LOADING
-====================================================== */
+/* =========================================================
+   LOAD IMAGE
+========================================================= */
 
-function loadImage(selectedFile) {
+function loadImage() {
 
   showMediaLoading();
 
-
-  imagePreview.classList.remove(
-    "hidden"
-  );
-
-
-  imagePreview.src =
-    objectUrl;
+  imagePreview?.classList.remove("hidden");
 
 
   imagePreview.onload = () => {
@@ -503,26 +456,23 @@ function loadImage(selectedFile) {
 
   };
 
+
+  imagePreview.src = objectUrl;
+
 }
 
 
-/* ======================================================
-   VIDEO LOADING
-====================================================== */
+/* =========================================================
+   LOAD VIDEO
+========================================================= */
 
-function loadVideo(selectedFile) {
+function loadVideo() {
 
   showMediaLoading();
 
+  videoPreview?.classList.remove("hidden");
 
-  videoPreview.classList.remove(
-    "hidden"
-  );
-
-
-  videoPreview.src =
-    objectUrl;
-
+  videoPreview.src = objectUrl;
 
   videoPreview.load();
 
@@ -557,7 +507,7 @@ function loadVideo(selectedFile) {
       hideMediaLoading();
 
       setStatus(
-        "The selected video could not be decoded by this browser.",
+        "The selected video could not be decoded by this browser. You can still upload MP4/WebM files supported by your browser.",
         true
       );
 
@@ -568,9 +518,9 @@ function loadVideo(selectedFile) {
 }
 
 
-/* ======================================================
-   LOADING INDICATOR
-====================================================== */
+/* =========================================================
+   MEDIA LOADING
+========================================================= */
 
 function showMediaLoading() {
 
@@ -590,179 +540,9 @@ function hideMediaLoading() {
 }
 
 
-/* ======================================================
-   BALL MARKING MODE
-====================================================== */
-
-markBallBtn?.addEventListener(
-  "click",
-  () => {
-
-    if (!file) {
-
-      setStatus(
-        "Choose an image first.",
-        true
-      );
-
-      return;
-
-    }
-
-
-    if (!mediaIsReady()) {
-
-      setStatus(
-        "The preview is still loading. Please wait a moment.",
-        true
-      );
-
-      return;
-
-    }
-
-
-    /*
-     * Enter marking mode.
-     */
-    marking = true;
-
-    start = null;
-
-
-    /*
-     * Update UI.
-     */
-    stage.classList.add(
-      "marking-active"
-    );
-
-
-    canvas.classList.remove(
-      "not-marking"
-    );
-
-
-    canvas.classList.add(
-      "marking"
-    );
-
-
-    markingBanner?.classList.remove(
-      "hidden"
-    );
-
-
-    markBallBtn.classList.add(
-      "active"
-    );
-
-
-    /*
-     * Make sure canvas is perfectly aligned
-     * before drawing.
-     */
-    resizeCanvas();
-
-
-    setBallStatus(
-      "drawing",
-      "Drag a rectangle around the ball…"
-    );
-
-  }
-);
-
-
-/* ======================================================
-   CLEAR BALL BOX
-====================================================== */
-
-clearBallBtn?.addEventListener(
-  "click",
-  () => {
-
-    ballBox = null;
-
-    cancelMarking();
-
-    clearCanvas();
-
-
-    setBallStatus(
-      "auto",
-      "Automatic ball detection enabled"
-    );
-
-  }
-);
-
-
-/* ======================================================
-   CANCEL MARKING MODE
-====================================================== */
-
-function cancelMarking() {
-
-  marking = false;
-
-  start = null;
-
-
-  stage?.classList.remove(
-    "marking-active"
-  );
-
-
-  canvas?.classList.remove(
-    "marking"
-  );
-
-
-  canvas?.classList.add(
-    "not-marking"
-  );
-
-
-  markingBanner?.classList.add(
-    "hidden"
-  );
-
-
-  markBallBtn?.classList.remove(
-    "active"
-  );
-
-}
-
-
-/* ======================================================
-   BALL STATUS
-====================================================== */
-
-function setBallStatus(
-  mode,
-  text
-) {
-
-  if (!ballStatus) {
-    return;
-  }
-
-
-  ballStatus.className =
-    `ball-status-badge mode-${mode}`;
-
-
-  ballStatus.innerHTML =
-    `<span class="ball-status-dot"></span>${escapeHtml(text)}`;
-
-}
-
-
-/* ======================================================
-   ACTIVE MEDIA
-====================================================== */
+/* =========================================================
+   MEDIA GEOMETRY
+========================================================= */
 
 function activeMedia() {
 
@@ -783,10 +563,6 @@ function activeMedia() {
 }
 
 
-/* ======================================================
-   NATURAL MEDIA SIZE
-====================================================== */
-
 function getNaturalSize(media) {
 
   return {
@@ -806,19 +582,18 @@ function getNaturalSize(media) {
 }
 
 
-/* ======================================================
-   CHECK MEDIA READY
-====================================================== */
-
 function mediaIsReady() {
 
   const media =
     activeMedia();
 
+  if (!media) {
+    return false;
+  }
+
 
   const natural =
     getNaturalSize(media);
-
 
   const rect =
     media.getBoundingClientRect();
@@ -834,9 +609,9 @@ function mediaIsReady() {
 }
 
 
-/* ======================================================
-   CANVAS RESIZE SCHEDULING
-====================================================== */
+/* =========================================================
+   RESIZE
+========================================================= */
 
 function scheduleResize() {
 
@@ -846,40 +621,18 @@ function scheduleResize() {
 
 
   resizeFrame =
-    requestAnimationFrame(
-      () => {
+    requestAnimationFrame(() => {
 
+      resizeCanvas();
+
+      requestAnimationFrame(() => {
         resizeCanvas();
+      });
 
-
-        /*
-         * Second frame handles cases where the
-         * browser has not finished layout yet.
-         */
-        requestAnimationFrame(
-          resizeCanvas
-        );
-
-      }
-    );
+    });
 
 }
 
-
-/* ======================================================
-   RESIZE CANVAS
-====================================================== */
-
-/*
- * VERY IMPORTANT:
- *
- * The canvas is NOT placed over the entire stage.
- *
- * It is placed exactly over the visible image/video.
- *
- * This prevents the "dead area" problem where the
- * pointer stops working in some sections.
- */
 
 function resizeCanvas() {
 
@@ -889,23 +642,17 @@ function resizeCanvas() {
 
   if (
     !media ||
-    media.classList.contains(
-      "hidden"
-    )
+    media.classList.contains("hidden")
   ) {
-
     return;
-
   }
 
 
   const natural =
     getNaturalSize(media);
 
-
   const stageRect =
     stage.getBoundingClientRect();
-
 
   const mediaRect =
     media.getBoundingClientRect();
@@ -915,57 +662,32 @@ function resizeCanvas() {
     !natural.width ||
     !natural.height ||
     !mediaRect.width ||
-    !mediaRect.height ||
-    !stageRect.width ||
-    !stageRect.height
+    !mediaRect.height
   ) {
-
     return;
-
   }
 
 
-  /*
-   * Canvas internal drawing resolution equals
-   * the displayed media dimensions.
-   */
   canvas.width =
     Math.max(
       1,
-      Math.round(
-        mediaRect.width
-      )
+      Math.round(mediaRect.width)
     );
 
 
   canvas.height =
     Math.max(
       1,
-      Math.round(
-        mediaRect.height
-      )
+      Math.round(mediaRect.height)
     );
 
 
-  /*
-   * Position canvas relative to stage.
-   */
-  const left =
-    mediaRect.left -
-    stageRect.left;
-
-
-  const top =
-    mediaRect.top -
-    stageRect.top;
-
-
   canvas.style.left =
-    `${left}px`;
+    `${mediaRect.left - stageRect.left}px`;
 
 
   canvas.style.top =
-    `${top}px`;
+    `${mediaRect.top - stageRect.top}px`;
 
 
   canvas.style.width =
@@ -976,17 +698,14 @@ function resizeCanvas() {
     `${mediaRect.height}px`;
 
 
-  /*
-   * Redraw previously selected box.
-   */
   drawBox();
 
 }
 
 
-/* ======================================================
-   RESIZE / ORIENTATION
-====================================================== */
+/* =========================================================
+   RESIZE EVENTS
+========================================================= */
 
 window.addEventListener(
   "resize",
@@ -1018,46 +737,186 @@ videoPreview?.addEventListener(
 );
 
 
-/*
- * ResizeObserver makes the overlay follow
- * changes to the stage/media size.
- */
 if (
   typeof ResizeObserver !==
   "undefined"
 ) {
 
   const observer =
-    new ResizeObserver(
-      () => {
-
-        scheduleResize();
-
-      }
-    );
+    new ResizeObserver(() => {
+      scheduleResize();
+    });
 
 
-  observer.observe(stage);
+  if (stage) {
+    observer.observe(stage);
+  }
 
-  observer.observe(imagePreview);
+  if (imagePreview) {
+    observer.observe(imagePreview);
+  }
 
-  observer.observe(videoPreview);
+  if (videoPreview) {
+    observer.observe(videoPreview);
+  }
 
 }
 
 
-/* ======================================================
-   POINTER POSITION
-====================================================== */
+/* =========================================================
+   BALL MARKING
+========================================================= */
 
-/*
- * Convert browser pointer coordinates into
- * canvas coordinates.
- *
- * Since the canvas itself is positioned directly
- * over the media, this is now reliable even when
- * the image is centered inside a larger stage.
- */
+markBallBtn?.addEventListener(
+  "click",
+  () => {
+
+    if (!file) {
+
+      setStatus(
+        "Choose an image or video first.",
+        true
+      );
+
+      return;
+    }
+
+
+    if (!mediaIsReady()) {
+
+      setStatus(
+        "The preview is still loading. Please wait a moment.",
+        true
+      );
+
+      return;
+    }
+
+
+    marking = true;
+    start = null;
+
+    stage.classList.add(
+      "marking-active"
+    );
+
+    canvas.classList.remove(
+      "not-marking"
+    );
+
+    canvas.classList.add(
+      "marking"
+    );
+
+    markingBanner?.classList.remove(
+      "hidden"
+    );
+
+    markBallBtn.classList.add(
+      "active"
+    );
+
+
+    resizeCanvas();
+
+
+    setBallStatus(
+      "drawing",
+      "Drag a rectangle around the ball…"
+    );
+
+  }
+);
+
+
+/* =========================================================
+   CLEAR BALL
+========================================================= */
+
+clearBallBtn?.addEventListener(
+  "click",
+  () => {
+
+    ballBox = null;
+
+    cancelMarking();
+
+    clearCanvas();
+
+
+    setBallStatus(
+      "auto",
+      "Automatic ball detection enabled"
+    );
+
+  }
+);
+
+
+/* =========================================================
+   CANCEL MARKING
+========================================================= */
+
+function cancelMarking() {
+
+  marking = false;
+  start = null;
+
+
+  stage?.classList.remove(
+    "marking-active"
+  );
+
+
+  canvas?.classList.remove(
+    "marking"
+  );
+
+
+  canvas?.classList.add(
+    "not-marking"
+  );
+
+
+  markingBanner?.classList.add(
+    "hidden"
+  );
+
+
+  markBallBtn?.classList.remove(
+    "active"
+  );
+
+}
+
+
+/* =========================================================
+   BALL STATUS
+========================================================= */
+
+function setBallStatus(
+  mode,
+  text
+) {
+
+  if (!ballStatus) {
+    return;
+  }
+
+
+  ballStatus.className =
+    `ball-status-badge mode-${mode}`;
+
+
+  ballStatus.innerHTML =
+    `<span class="ball-status-dot"></span>${escapeHtml(text)}`;
+
+}
+
+
+/* =========================================================
+   POINTER → CANVAS
+========================================================= */
 
 function pointerPos(event) {
 
@@ -1091,22 +950,15 @@ function pointerPos(event) {
   return {
 
     x: clamp(
-      (
-        event.clientX -
-        rect.left
-      ) * scaleX,
-
+      (event.clientX - rect.left) *
+        scaleX,
       0,
       canvas.width
     ),
 
-
     y: clamp(
-      (
-        event.clientY -
-        rect.top
-      ) * scaleY,
-
+      (event.clientY - rect.top) *
+        scaleY,
       0,
       canvas.height
     )
@@ -1116,9 +968,9 @@ function pointerPos(event) {
 }
 
 
-/* ======================================================
+/* =========================================================
    POINTER DOWN
-====================================================== */
+========================================================= */
 
 canvas?.addEventListener(
   "pointerdown",
@@ -1131,9 +983,7 @@ canvas?.addEventListener(
 
     event.preventDefault();
 
-
-    start =
-      pointerPos(event);
+    start = pointerPos(event);
 
 
     try {
@@ -1148,9 +998,9 @@ canvas?.addEventListener(
 );
 
 
-/* ======================================================
+/* =========================================================
    POINTER MOVE
-====================================================== */
+========================================================= */
 
 canvas?.addEventListener(
   "pointermove",
@@ -1160,9 +1010,7 @@ canvas?.addEventListener(
       !marking ||
       !start
     ) {
-
       return;
-
     }
 
 
@@ -1174,22 +1022,19 @@ canvas?.addEventListener(
 
 
     drawBox([
-
       start.x,
       start.y,
-
       point.x,
       point.y
-
     ]);
 
   }
 );
 
 
-/* ======================================================
+/* =========================================================
    POINTER UP
-====================================================== */
+========================================================= */
 
 canvas?.addEventListener(
   "pointerup",
@@ -1207,9 +1052,6 @@ canvas?.addEventListener(
       pointerPos(event);
 
 
-    /*
-     * Normalize drag direction.
-     */
     const x1 =
       Math.min(
         start.x,
@@ -1238,9 +1080,6 @@ canvas?.addEventListener(
       );
 
 
-    /*
-     * Ignore accidental tiny clicks.
-     */
     if (
       x2 - x1 > 4 &&
       y2 - y1 > 4
@@ -1261,35 +1100,22 @@ canvas?.addEventListener(
         canvas.height
       ) {
 
-        /*
-         * Convert DISPLAY coordinates
-         * back to ORIGINAL image coordinates.
-         */
         ballBox = [
 
-          (
-            x1 /
-            canvas.width
-          ) * natural.width,
+          (x1 / canvas.width) *
+            natural.width,
 
-          (
-            y1 /
-            canvas.height
-          ) * natural.height,
+          (y1 / canvas.height) *
+            natural.height,
 
-          (
-            x2 /
-            canvas.width
-          ) * natural.width,
+          (x2 / canvas.width) *
+            natural.width,
 
-          (
-            y2 /
-            canvas.height
-          ) * natural.height
+          (y2 / canvas.height) *
+            natural.height
 
-        ].map(
-          (value) =>
-            Math.round(value)
+        ].map((value) =>
+          Math.round(value)
         );
 
 
@@ -1299,15 +1125,8 @@ canvas?.addEventListener(
         );
 
 
-        /*
-         * Leave drawing mode.
-         */
         cancelMarking();
 
-
-        /*
-         * Draw confirmed box.
-         */
         drawBox();
 
       }
@@ -1337,9 +1156,9 @@ canvas?.addEventListener(
 );
 
 
-/* ======================================================
+/* =========================================================
    POINTER CANCEL
-====================================================== */
+========================================================= */
 
 canvas?.addEventListener(
   "pointercancel",
@@ -1363,13 +1182,16 @@ canvas?.addEventListener(
 );
 
 
-/* ======================================================
+/* =========================================================
    DRAW BALL BOX
-====================================================== */
+========================================================= */
 
-function drawBox(
-  temp = null
-) {
+function drawBox(temp = null) {
+
+  if (!ctx) {
+    return;
+  }
+
 
   ctx.clearRect(
     0,
@@ -1379,19 +1201,13 @@ function drawBox(
   );
 
 
-  let box =
-    temp;
+  let box = temp;
 
 
   const isTemp =
     temp !== null;
 
 
-  /*
-   * If there is no temporary drag,
-   * convert saved ORIGINAL coordinates
-   * back into DISPLAY coordinates.
-   */
   if (
     !box &&
     ballBox
@@ -1407,33 +1223,23 @@ function drawBox(
       !natural.width ||
       !natural.height
     ) {
-
       return;
-
     }
 
 
     box = [
 
-      (
-        ballBox[0] /
-        natural.width
-      ) * canvas.width,
+      (ballBox[0] / natural.width) *
+        canvas.width,
 
-      (
-        ballBox[1] /
-        natural.height
-      ) * canvas.height,
+      (ballBox[1] / natural.height) *
+        canvas.height,
 
-      (
-        ballBox[2] /
-        natural.width
-      ) * canvas.width,
+      (ballBox[2] / natural.width) *
+        canvas.width,
 
-      (
-        ballBox[3] /
-        natural.height
-      ) * canvas.height
+      (ballBox[3] / natural.height) *
+        canvas.height
 
     ];
 
@@ -1453,61 +1259,37 @@ function drawBox(
   ] = box;
 
 
-  /*
-   * Normalize and clamp.
-   */
-  const normalizedX1 =
-    clamp(
-      Math.min(x1, x2),
-      0,
-      canvas.width
-    );
+  x1 = clamp(
+    Math.min(x1, x2),
+    0,
+    canvas.width
+  );
 
 
-  const normalizedY1 =
-    clamp(
-      Math.min(y1, y2),
-      0,
-      canvas.height
-    );
+  y1 = clamp(
+    Math.min(y1, y2),
+    0,
+    canvas.height
+  );
 
 
-  const normalizedX2 =
-    clamp(
-      Math.max(x1, x2),
-      0,
-      canvas.width
-    );
+  x2 = clamp(
+    Math.max(x1, x2),
+    0,
+    canvas.width
+  );
 
 
-  const normalizedY2 =
-    clamp(
-      Math.max(y1, y2),
-      0,
-      canvas.height
-    );
+  y2 = clamp(
+    Math.max(y1, y2),
+    0,
+    canvas.height
+  );
 
-
-  x1 = normalizedX1;
-  y1 = normalizedY1;
-  x2 = normalizedX2;
-  y2 = normalizedY2;
-
-
-  /* --------------------------------------------------
-     BOX
-  -------------------------------------------------- */
 
   ctx.save();
 
 
-  /*
-   * Temporary drawing:
-   * orange dashed.
-   *
-   * Confirmed drawing:
-   * white solid.
-   */
   ctx.strokeStyle =
     isTemp
       ? "#f97316"
@@ -1515,9 +1297,7 @@ function drawBox(
 
 
   ctx.lineWidth =
-    isTemp
-      ? 2
-      : 3;
+    isTemp ? 2 : 3;
 
 
   ctx.setLineDash(
@@ -1538,13 +1318,10 @@ function drawBox(
   ctx.setLineDash([]);
 
 
-  /*
-   * Fill.
-   */
   ctx.fillStyle =
     isTemp
-      ? "rgba(249,115,22,0.18)"
-      : "rgba(255,255,255,0.14)";
+      ? "rgba(249,115,22,.18)"
+      : "rgba(255,255,255,.14)";
 
 
   ctx.fillRect(
@@ -1555,46 +1332,27 @@ function drawBox(
   );
 
 
-  /*
-   * Corner handles.
-   */
   if (!isTemp) {
 
     const size = 8;
-
 
     ctx.fillStyle =
       "#f97316";
 
 
-    const corners = [
-
+    [
       [x1, y1],
-
       [x2, y1],
-
       [x1, y2],
-
       [x2, y2]
-
-    ];
-
-
-    corners.forEach(
+    ].forEach(
       ([cx, cy]) => {
 
         ctx.fillRect(
-
-          cx -
-            size / 2,
-
-          cy -
-            size / 2,
-
+          cx - size / 2,
+          cy - size / 2,
           size,
-
           size
-
         );
 
       }
@@ -1608,9 +1366,9 @@ function drawBox(
 }
 
 
-/* ======================================================
+/* =========================================================
    CLEAR CANVAS
-====================================================== */
+========================================================= */
 
 function clearCanvas() {
 
@@ -1629,17 +1387,14 @@ function clearCanvas() {
 }
 
 
-/* ======================================================
-   ANALYZE
-====================================================== */
+/* =========================================================
+   ANALYSIS
+========================================================= */
 
 analyzeBtn?.addEventListener(
   "click",
   async () => {
 
-    /*
-     * Make sure a file exists.
-     */
     if (!file) {
 
       setStatus(
@@ -1648,20 +1403,14 @@ analyzeBtn?.addEventListener(
       );
 
       return;
-
     }
 
 
-    /*
-     * Disable button during request.
-     */
     const originalText =
       analyzeBtn.textContent;
 
 
-    analyzeBtn.disabled =
-      true;
-
+    analyzeBtn.disabled = true;
 
     analyzeBtn.textContent =
       "Running analysis…";
@@ -1677,9 +1426,6 @@ analyzeBtn?.addEventListener(
     );
 
 
-    /*
-     * Build multipart request.
-     */
     const form =
       new FormData();
 
@@ -1692,8 +1438,9 @@ analyzeBtn?.addEventListener(
 
 
     /*
-     * Manual ball box.
+     * Manual ball selection
      */
+
     if (ballBox) {
 
       form.append(
@@ -1705,34 +1452,28 @@ analyzeBtn?.addEventListener(
 
 
     /*
-     * Detection interval.
+     * Video detection interval
      */
-    const detectInput =
-      $("detectEvery");
-
 
     const detectEvery =
       Math.max(
         1,
         Number.parseInt(
-          detectInput?.value,
+          $("detectEvery")?.value,
           10
         ) || 1
       );
 
 
     /*
-     * Calibration interval.
+     * Video calibration interval
      */
-    const calibrationInput =
-      $("calibrationEvery");
-
 
     const calibrationEvery =
       Math.max(
         1,
         Number.parseInt(
-          calibrationInput?.value,
+          $("calibrationEvery")?.value,
           10
         ) || 30
       );
@@ -1752,12 +1493,6 @@ analyzeBtn?.addEventListener(
 
     try {
 
-      /*
-       * Send to Node.js.
-       *
-       * Node.js should proxy this to
-       * FastAPI on port 8000.
-       */
       const response =
         await fetch(
           "/api/analyze",
@@ -1768,10 +1503,6 @@ analyzeBtn?.addEventListener(
         );
 
 
-      /*
-       * Handle both JSON and plain-text
-       * server responses.
-       */
       const contentType =
         response.headers.get(
           "content-type"
@@ -1800,9 +1531,6 @@ analyzeBtn?.addEventListener(
       }
 
 
-      /*
-       * HTTP error.
-       */
       if (!response.ok) {
 
         throw new Error(
@@ -1814,10 +1542,8 @@ analyzeBtn?.addEventListener(
       }
 
 
-      /*
-       * Render successful result.
-       */
       renderResults(data);
+
 
     } catch (error) {
 
@@ -1833,14 +1559,10 @@ analyzeBtn?.addEventListener(
         true
       );
 
+
     } finally {
 
-      /*
-       * Restore button.
-       */
-      analyzeBtn.disabled =
-        false;
-
+      analyzeBtn.disabled = false;
 
       analyzeBtn.textContent =
         originalText;
@@ -1851,9 +1573,9 @@ analyzeBtn?.addEventListener(
 );
 
 
-/* ======================================================
+/* =========================================================
    STATUS
-====================================================== */
+========================================================= */
 
 function setStatus(
   message,
@@ -1882,9 +1604,9 @@ function setStatus(
 }
 
 
-/* ======================================================
-   RENDER RESULTS
-====================================================== */
+/* =========================================================
+   RESULTS
+========================================================= */
 
 function renderResults(data) {
 
@@ -1899,19 +1621,13 @@ function renderResults(data) {
 
 
   /*
-   * Video response may contain:
-   *
-   * data.final_analysis
-   *
-   * Image response is directly
-   * represented by data.
+   * Video responses contain the final
+   * analysis inside final_analysis.
    */
+
   const analysis =
     data.mode === "video"
-      ? (
-          data.final_analysis ||
-          {}
-        )
+      ? data.final_analysis || {}
       : data;
 
 
@@ -1929,9 +1645,6 @@ function renderResults(data) {
       : [];
 
 
-  /*
-   * Count players.
-   */
   const playerCount =
     detections.filter(
       (item) =>
@@ -1939,9 +1652,6 @@ function renderResults(data) {
     ).length;
 
 
-  /*
-   * Determine ball state.
-   */
   const ballDetected =
     Boolean(
       data.ball_input
@@ -1951,17 +1661,17 @@ function renderResults(data) {
     );
 
 
-  /*
-   * Metrics.
-   */
+  /* =======================================================
+     METRICS
+  ======================================================= */
+
   if ($("metrics")) {
 
     const metrics = [
 
       [
         "Mode",
-        data.mode ||
-        "image"
+        data.mode || "image"
       ],
 
       [
@@ -2010,9 +1720,9 @@ function renderResults(data) {
   }
 
 
-  /* ==================================================
+  /* =======================================================
      WARNINGS
-  ================================================== */
+  ======================================================= */
 
   const warnings = [
 
@@ -2038,25 +1748,25 @@ function renderResults(data) {
         ...new Set(warnings)
       ]
         .map(
-          (warning) =>
-            `
-              <div class="warning">
-                ${escapeHtml(warning)}
-              </div>
-            `
+          (warning) => `
+
+            <div class="warning">
+              ${escapeHtml(warning)}
+            </div>
+
+          `
         )
         .join("");
 
   }
 
 
-  /* ==================================================
-     VISUAL RESULT FILES
-  ================================================== */
+  /* =======================================================
+     COLLECT RESULT IMAGES
+  ======================================================= */
 
   const files =
-    analysis.files ||
-    {};
+    analysis.files || {};
 
 
   const images = [];
@@ -2064,31 +1774,33 @@ function renderResults(data) {
 
   function walk(value) {
 
-    /*
-     * Direct image path.
-     */
     if (
-      typeof value ===
-        "string" &&
-      /\.(png|jpg|jpeg|webp)$/i.test(
-        value
-      )
+      typeof value === "string"
     ) {
 
-      images.push(value);
+      /*
+       * Backend can return image paths
+       * with PNG/JPG/JPEG/WEBP.
+       */
+
+      if (
+        /\.(png|jpg|jpeg|webp)$/i.test(
+          value
+        )
+      ) {
+
+        images.push(value);
+
+      }
+
 
       return;
-
     }
 
 
-    /*
-     * Nested object/array.
-     */
     if (
       value &&
-      typeof value ===
-        "object"
+      typeof value === "object"
     ) {
 
       Object.values(value)
@@ -2102,40 +1814,26 @@ function renderResults(data) {
   walk(files);
 
 
-  if ($("visuals")) {
+  /*
+   * Remove duplicate paths
+   * and limit output count.
+   */
 
-    $("visuals").innerHTML =
-      images
-        .slice(0, 10)
-        .map(
-          (url) => {
-
-            const safeUrl =
-              escapeAttribute(
-                resolveUrl(url)
-              );
+  resultImages =
+    [
+      ...new Set(images)
+    ].slice(0, 20);
 
 
-            return `
-
-              <img
-                src="${safeUrl}"
-                loading="lazy"
-                alt="PitchVision analysis result"
-              />
-
-            `;
-
-          }
-        )
-        .join("");
-
-  }
+  currentResultIndex = 0;
 
 
-  /* ==================================================
+  renderResultCarousel();
+
+
+  /* =======================================================
      RAW JSON
-  ================================================== */
+  ======================================================= */
 
   if ($("json")) {
 
@@ -2149,9 +1847,10 @@ function renderResults(data) {
   }
 
 
-  /*
-   * Scroll to results.
-   */
+  /* =======================================================
+     SCROLL TO RESULTS
+  ======================================================= */
+
   window.setTimeout(
     () => {
 
@@ -2167,9 +1866,436 @@ function renderResults(data) {
 }
 
 
-/* ======================================================
-   RESOLVE RESULT URL
-====================================================== */
+/* =========================================================
+   RESULT CAROUSEL
+========================================================= */
+
+function renderResultCarousel() {
+
+  const visuals =
+    $("visuals");
+
+
+  if (!visuals) {
+    return;
+  }
+
+
+  /*
+   * No output images
+   */
+
+  if (!resultImages.length) {
+
+    visuals.innerHTML = `
+
+      <div class="visual-empty">
+        No visual analysis outputs were returned.
+      </div>
+
+    `;
+
+
+    updateCarouselControls();
+    updateOutputCounter();
+
+    return;
+  }
+
+
+  /*
+   * Keep index valid
+   */
+
+  if (
+    currentResultIndex < 0 ||
+    currentResultIndex >=
+      resultImages.length
+  ) {
+
+    currentResultIndex = 0;
+
+  }
+
+
+  /*
+   * Resolve image URL
+   */
+
+  const currentUrl =
+    resolveUrl(
+      resultImages[
+        currentResultIndex
+      ]
+    );
+
+
+  /*
+   * Generate title
+   */
+
+  const title =
+    getResultTitle(
+      resultImages[
+        currentResultIndex
+      ],
+      currentResultIndex
+    );
+
+
+  /*
+   * Render one output
+   */
+
+  visuals.innerHTML = `
+
+    <div class="visual-carousel">
+
+      <!-- PREVIOUS -->
+
+      <button
+        id="visualPrev"
+        class="visual-nav visual-prev"
+        type="button"
+        aria-label="Previous analysis result"
+      >
+        ←
+      </button>
+
+
+      <!-- CURRENT OUTPUT -->
+
+      <div class="visual-frame">
+
+        <img
+          id="visualImage"
+          src="${escapeAttribute(currentUrl)}"
+          alt="${escapeAttribute(title)}"
+        />
+
+
+        <div class="visual-overlay">
+
+          <span
+            id="visualTitle"
+            class="visual-title"
+          >
+            ${escapeHtml(title)}
+          </span>
+
+
+          <span
+            class="visual-counter"
+          >
+            ${formatCounter(
+              currentResultIndex + 1,
+              resultImages.length
+            )}
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- NEXT -->
+
+      <button
+        id="visualNext"
+        class="visual-nav visual-next"
+        type="button"
+        aria-label="Next analysis result"
+      >
+        →
+      </button>
+
+    </div>
+
+  `;
+
+
+  /*
+   * Attach button events
+   */
+
+  $("visualPrev")?.addEventListener(
+    "click",
+    showPreviousResult
+  );
+
+
+  $("visualNext")?.addEventListener(
+    "click",
+    showNextResult
+  );
+
+
+  /*
+   * Update controls
+   */
+
+  updateCarouselControls();
+  updateOutputCounter();
+
+}
+
+
+/* =========================================================
+   PREVIOUS OUTPUT
+========================================================= */
+
+function showPreviousResult() {
+
+  if (
+    resultImages.length <= 1
+  ) {
+    return;
+  }
+
+
+  currentResultIndex =
+    (
+      currentResultIndex -
+      1 +
+      resultImages.length
+    ) %
+    resultImages.length;
+
+
+  renderResultCarousel();
+
+}
+
+
+/* =========================================================
+   NEXT OUTPUT
+========================================================= */
+
+function showNextResult() {
+
+  if (
+    resultImages.length <= 1
+  ) {
+    return;
+  }
+
+
+  currentResultIndex =
+    (
+      currentResultIndex +
+      1
+    ) %
+    resultImages.length;
+
+
+  renderResultCarousel();
+
+}
+
+
+/* =========================================================
+   CAROUSEL BUTTON STATE
+========================================================= */
+
+function updateCarouselControls() {
+
+  const previousButton =
+    $("visualPrev");
+
+  const nextButton =
+    $("visualNext");
+
+
+  const disabled =
+    resultImages.length <= 1;
+
+
+  if (previousButton) {
+
+    previousButton.disabled =
+      disabled;
+
+  }
+
+
+  if (nextButton) {
+
+    nextButton.disabled =
+      disabled;
+
+  }
+
+}
+
+
+/* =========================================================
+   OUTPUT COUNTER
+========================================================= */
+
+function updateOutputCounter() {
+
+  /*
+   * Counter inside the currently
+   * displayed output.
+   */
+
+  const counter =
+    document.querySelector(
+      ".visual-frame .visual-counter"
+    );
+
+
+  if (!counter) {
+    return;
+  }
+
+
+  if (!resultImages.length) {
+
+    counter.textContent =
+      "00 / 00";
+
+    return;
+  }
+
+
+  counter.textContent =
+    formatCounter(
+      currentResultIndex + 1,
+      resultImages.length
+    );
+
+}
+
+
+/* =========================================================
+   KEYBOARD NAVIGATION
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  (event) => {
+
+    /*
+     * Don't capture arrow keys when
+     * typing into form elements.
+     */
+
+    const tag =
+      document.activeElement?.tagName;
+
+
+    if (
+      tag === "INPUT" ||
+      tag === "TEXTAREA" ||
+      tag === "SELECT"
+    ) {
+      return;
+    }
+
+
+    /*
+     * Don't navigate if results
+     * are not visible.
+     */
+
+    if (
+      results?.classList.contains(
+        "hidden"
+      )
+    ) {
+      return;
+    }
+
+
+    if (
+      event.key === "ArrowLeft"
+    ) {
+
+      event.preventDefault();
+
+      showPreviousResult();
+
+    }
+
+
+    if (
+      event.key === "ArrowRight"
+    ) {
+
+      event.preventDefault();
+
+      showNextResult();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   RESULT TITLES
+========================================================= */
+
+function getResultTitle(
+  url,
+  index
+) {
+
+  const raw =
+    String(url || "")
+      .split("/")
+      .pop()
+      .replace(
+        /\.[^.]+$/,
+        ""
+      );
+
+
+  if (!raw) {
+
+    return (
+      `Analysis result ${index + 1}`
+    );
+
+  }
+
+
+  return raw
+    .replace(
+      /[\_-]+/g,
+      " "
+    )
+    .replace(
+      /\b\w/g,
+      (char) =>
+        char.toUpperCase()
+    );
+
+}
+
+
+/* =========================================================
+   COUNTER FORMAT
+========================================================= */
+
+function formatCounter(
+  current,
+  total
+) {
+
+  return (
+    String(current).padStart(2, "0") +
+    " / " +
+    String(total).padStart(2, "0")
+  );
+
+}
+
+
+/* =========================================================
+   URL RESOLUTION
+========================================================= */
 
 function resolveUrl(url) {
 
@@ -2178,42 +2304,41 @@ function resolveUrl(url) {
   }
 
 
+  const value =
+    String(url).trim();
+
+
   /*
-   * Absolute HTTP/HTTPS URL.
+   * Absolute external URL
    */
+
   if (
-    /^https?:\/\//i.test(
-      url
-    )
+    /^https?:\/\//i.test(value)
   ) {
 
-    return url;
+    return value;
 
   }
 
 
   /*
-   * Already absolute local path.
+   * Absolute local URL
    */
+
   if (
-    url.startsWith("/")
+    value.startsWith("/")
   ) {
 
-    return url;
+    return value;
 
   }
 
 
   /*
-   * Python may return:
-   *
-   * results/file.png
-   *
-   * or:
-   *
-   * /results/file.png
+   * Backend relative path
    */
-  return `/${String(url).replace(
+
+  return `/${value.replace(
     /^\/+/,
     ""
   )}`;
@@ -2221,9 +2346,9 @@ function resolveUrl(url) {
 }
 
 
-/* ======================================================
-   CLAMP
-====================================================== */
+/* =========================================================
+   HELPERS
+========================================================= */
 
 function clamp(
   value,
@@ -2242,13 +2367,11 @@ function clamp(
 }
 
 
-/* ======================================================
+/* =========================================================
    FORMAT FILE SIZE
-====================================================== */
+========================================================= */
 
-function formatBytes(
-  bytes
-) {
+function formatBytes(bytes) {
 
   if (
     !Number.isFinite(bytes) ||
@@ -2278,15 +2401,13 @@ function formatBytes(
     );
 
 
-  const value =
+  return `${(
     bytes /
     Math.pow(
       1024,
       index
-    );
-
-
-  return `${value.toFixed(
+    )
+  ).toFixed(
     index === 0
       ? 0
       : 1
@@ -2295,13 +2416,11 @@ function formatBytes(
 }
 
 
-/* ======================================================
+/* =========================================================
    ESCAPE HTML
-====================================================== */
+========================================================= */
 
-function escapeHtml(
-  value
-) {
+function escapeHtml(value) {
 
   return String(
     value ?? ""
@@ -2310,13 +2429,9 @@ function escapeHtml(
     (char) => ({
 
       "&": "&amp;",
-
       "<": "&lt;",
-
       ">": "&gt;",
-
       "'": "&#39;",
-
       '"': "&quot;"
 
     }[char])
@@ -2325,16 +2440,12 @@ function escapeHtml(
 }
 
 
-/* ======================================================
+/* =========================================================
    ESCAPE ATTRIBUTE
-====================================================== */
+========================================================= */
 
-function escapeAttribute(
-  value
-) {
+function escapeAttribute(value) {
 
-  return escapeHtml(
-    value
-  );
+  return escapeHtml(value);
 
 }
