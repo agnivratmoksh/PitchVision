@@ -299,7 +299,7 @@ def run_detection(img_pil, ckpt=None):
     # Faster R-CNN already suppresses many duplicates, but an explicit per-class NMS
     # keeps the output stable for the tactical layer.
     idx = []
-    nms_iou = CONFIG.get("nms_iou_threshold", 0.4)
+    nms_iou = CONFIG.get("nms_iou_threshold", 0.33)
     for c in labels.unique():
         cm = (labels == c).nonzero(as_tuple=True)[0]
         idx.extend(cm[torchvision_nms(boxes[cm], scores[cm], nms_iou)].tolist())
